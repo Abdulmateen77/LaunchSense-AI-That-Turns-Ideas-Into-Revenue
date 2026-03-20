@@ -2,101 +2,109 @@
 
 ## Introduction
 
-LaunchSense is a hackathon project that delivers a commercially structured launch package entirely through a conversational chat interface powered by agentic AI. The user describes their existing business and new product/service idea in natural language. An AI agent then orchestrates a sequence of generation steps — offer definition, positioning, landing page copy, and first-pass acquisition assets — and returns the complete Launch Package as a structured chat response. There is no form, no dashboard, and no separate UI: the chat is the application.
+LaunchSense is a hackathon project that delivers a commercially structured launch package entirely through a conversational chat interface powered by agentic AI. The user describes their existing business and new product/service idea in natural language. The Agent then progresses through a fixed four-phase conversation flow: gathering business context, analysing and validating the offer (with a viability gate), presenting the finalised offer, and generating landing page copy plus marketing assets. There is no form, no dashboard, and no separate UI: the chat is the application.
+
+## Conversation Flow
+
+The Agent MUST progress through the following phases in order. A phase may only begin when the previous phase is complete.
+
+```
+Phase 1: BUSINESS IDEA AND CONTEXT
+         ↓
+Phase 2: OFFER ANALYSIS AND CONSOLIDATION
+         ↓ (if viable)
+         ↺ (if not viable → suggest alternative → restart Phase 2)
+         ↓
+Phase 3: OFFER PRESENTATION
+         ↓
+Phase 4: LANDING PAGE AND MARKETING STRATEGY
+```
 
 ## Glossary
 
 - **System**: The LaunchSense chat application
-- **Agent**: The agentic AI that orchestrates the conversation, gathers context, and drives all generation steps
+- **Agent**: The agentic AI that orchestrates the conversation and drives all generation steps
 - **User**: A business owner or operator interacting with the Agent via chat
-- **Business_Context**: The information gathered by the Agent through conversational turns — existing business type, current customer base, and new product/service idea
-- **Offer_Engine**: The Agent capability responsible for deriving target segment, pain point, offer framing, guarantee, and final offer statement
-- **Landing_Page_Generator**: The Agent capability responsible for producing first-draft landing page copy
-- **Channel_Selector**: The Agent capability responsible for recommending a primary launch channel
-- **Asset_Generator**: The Agent capability responsible for producing outreach assets (email and LinkedIn message)
-- **Launch_Package**: The complete structured output posted by the Agent into the chat, containing the Offer, Landing Page copy, and Launch Assets
+- **Business_Context**: Information gathered in Phase 1 — existing business type, current customer base, and new product/service idea
+- **Viability_Gate**: The decision point in Phase 2 where the Agent determines whether the idea is commercially viable enough to proceed
+- **Offer**: The structured commercial definition produced in Phase 2 — target segment, pain point, outcome, guarantee, and final offer statement
+- **Launch_Package**: The complete output across Phases 3 and 4 — Offer, Landing Page copy, and Marketing Assets
 - **CTA**: Call to action — the primary action the landing page asks a visitor to take
 
 ---
 
 ## Requirements
 
-### Requirement 1: Conversational Business Context Gathering
+### Requirement 1: Phase 1 — Business Idea and Context
 
-**User Story:** As a business owner, I want to describe my business and new idea through natural conversation, so that I don't have to fill in a form to get started.
+**User Story:** As a business owner, I want to describe my business and new idea through natural conversation, so that the Agent understands my situation before doing any analysis.
 
 #### Acceptance Criteria
 
-1. WHEN the User sends their first message, THE Agent SHALL respond with a conversational prompt that invites the User to share their existing business type, current customer base, and new product/service idea.
-2. THE Agent SHALL accept Business_Context as free-text natural language across one or more conversational turns.
-3. WHEN the Agent has gathered all three required context elements (business type, customer base, new idea), THE Agent SHALL confirm its understanding back to the User in a single summary message before proceeding to generation.
-4. IF any required context element is missing after the User's initial message, THEN THE Agent SHALL ask a targeted follow-up question to obtain only the missing element.
-5. THE Agent SHALL proceed to generation only after the User has confirmed or not objected to the summary within one follow-up turn.
+1. WHEN the User sends their first message, THE Agent SHALL open Phase 1 with a conversational prompt asking for: existing business type, current customer base description, and new product/service idea.
+2. THE Agent SHALL accept input as free-text natural language across one or more conversational turns.
+3. IF any of the three required context elements are missing after the User's initial message, THEN THE Agent SHALL ask a single targeted follow-up question to obtain only the missing element(s).
+4. WHEN all three context elements have been gathered, THE Agent SHALL post a concise summary of its understanding and ask the User to confirm before proceeding to Phase 2.
+5. THE Agent SHALL NOT proceed to Phase 2 until the User has confirmed the summary or provided a correction.
 
 ---
 
-### Requirement 2: Offer Engineering
+### Requirement 2: Phase 2 — Offer Analysis and Consolidation
 
-**User Story:** As a business owner, I want the Agent to derive a clear offer from my idea, so that I have a commercially structured starting point for my launch.
+**User Story:** As a business owner, I want the Agent to analyse my idea before building anything, so that I don't waste time launching something that won't work.
 
 #### Acceptance Criteria
 
-1. WHEN a confirmed Business_Context is available, THE Offer_Engine SHALL derive a target customer segment from the customer base description.
-2. WHEN a confirmed Business_Context is available, THE Offer_Engine SHALL identify a core customer pain point relevant to the new product/service idea.
-3. WHEN a confirmed Business_Context is available, THE Offer_Engine SHALL produce an offer framing that includes a clear outcome statement and a risk-reduction element.
-4. WHEN a confirmed Business_Context is available, THE Offer_Engine SHALL generate a guarantee statement appropriate to the offer framing.
-5. WHEN a confirmed Business_Context is available, THE Offer_Engine SHALL produce a final offer statement combining target segment, pain point, outcome, and guarantee into a single coherent sentence or short paragraph.
-6. IF the Offer_Engine cannot derive a coherent offer, THEN THE Agent SHALL post a message explaining the issue and ask the User to clarify their idea.
+1. WHEN Phase 1 is confirmed, THE Agent SHALL enter Phase 2 and analyse the idea against the following dimensions: target customer clarity, pain point severity, market differentiation, and monetisation plausibility.
+2. WHEN analysis is complete, THE Agent SHALL post a brief analysis summary (no more than 150 words) covering each dimension.
+3. WHEN analysis is complete, THE Viability_Gate SHALL classify the idea as either VIABLE or NOT VIABLE based on the analysis.
+4. IF the Viability_Gate classifies the idea as VIABLE, THEN THE Agent SHALL consolidate the analysis into a structured Offer (target segment, pain point, outcome statement, guarantee, final offer statement) and proceed to Phase 3.
+5. IF the Viability_Gate classifies the idea as NOT VIABLE, THEN THE Agent SHALL:
+   a. Explain clearly why the idea does not meet the viability threshold.
+   b. Suggest at least one alternative or refined idea based on the User's Business_Context.
+   c. Ask the User whether they want to proceed with the suggested alternative or provide a new idea.
+6. WHEN the User accepts an alternative or provides a new idea in step 5c, THE Agent SHALL restart Phase 2 analysis with the updated idea.
+7. THE Agent SHALL NOT proceed to Phase 3 until the Viability_Gate returns VIABLE.
 
 ---
 
-### Requirement 3: Landing Page Copy Generation
+### Requirement 3: Phase 3 — Offer Presentation
 
-**User Story:** As a business owner, I want a first-draft landing page delivered in chat, so that I can quickly validate my offer with real traffic.
+**User Story:** As a business owner, I want to see the finalised offer clearly presented before any assets are generated, so that I can confirm it reflects my intent.
 
 #### Acceptance Criteria
 
-1. WHEN an offer has been generated, THE Landing_Page_Generator SHALL produce a headline of no more than 12 words.
-2. WHEN an offer has been generated, THE Landing_Page_Generator SHALL produce a subheadline of no more than 25 words that expands on the headline.
-3. WHEN an offer has been generated, THE Landing_Page_Generator SHALL produce a problem statement of no more than 100 words describing the target customer's pain.
-4. WHEN an offer has been generated, THE Landing_Page_Generator SHALL produce a solution explanation of no more than 150 words describing how the offer resolves the pain.
-5. WHEN an offer has been generated, THE Landing_Page_Generator SHALL produce a CTA consisting of a single imperative phrase of no more than 8 words.
-6. IF any required copy section cannot be produced, THEN THE Agent SHALL post a message identifying the missing section.
+1. WHEN Phase 2 produces a VIABLE Offer, THE Agent SHALL post the Offer in a clearly labelled chat message containing: target customer segment, core pain point, outcome statement, guarantee, and final offer statement.
+2. THE Agent SHALL ask the User to confirm the Offer or request adjustments before proceeding to Phase 4.
+3. IF the User requests adjustments, THEN THE Agent SHALL update the relevant Offer elements and re-present the Offer for confirmation.
+4. THE Agent SHALL NOT proceed to Phase 4 until the User has confirmed the Offer.
 
 ---
 
-### Requirement 4: Launch Channel Selection
+### Requirement 4: Phase 4 — Landing Page and Marketing Strategy
 
-**User Story:** As a business owner, I want the Agent to recommend the best launch channel for my situation, so that I focus my effort where it is most likely to convert.
-
-#### Acceptance Criteria
-
-1. WHEN a confirmed Business_Context is available, THE Channel_Selector SHALL evaluate three candidate channels: cold outreach, existing customer email, and organic social.
-2. THE Channel_Selector SHALL select exactly one primary channel and include a rationale of no more than 50 words in the chat output.
-3. IF the Business_Context does not contain sufficient information to differentiate between channels, THEN THE Channel_Selector SHALL default to existing customer email and state this assumption in the rationale.
-
----
-
-### Requirement 5: Outreach Asset Generation
-
-**User Story:** As a business owner, I want ready-to-send outreach assets delivered in chat, so that I can begin acquiring customers immediately.
+**User Story:** As a business owner, I want a landing page draft and marketing assets delivered in chat, so that I can act on my launch immediately.
 
 #### Acceptance Criteria
 
-1. WHEN a primary launch channel has been selected, THE Asset_Generator SHALL produce one outreach email of no more than 200 words aligned to the selected channel and offer.
-2. WHEN a primary launch channel has been selected, THE Asset_Generator SHALL produce one LinkedIn message of no more than 300 characters aligned to the selected channel and offer.
-3. THE Asset_Generator SHALL ensure both assets reference the final offer statement produced by the Offer_Engine.
-4. IF the Asset_Generator cannot produce a required asset, THEN THE Agent SHALL post a message identifying the missing asset.
+**Landing Page Copy**
 
----
+1. WHEN Phase 3 is confirmed, THE Agent SHALL generate landing page copy containing: a headline (≤12 words), a subheadline (≤25 words), a problem statement (≤100 words), a solution explanation (≤150 words), and a CTA (≤8 words, single imperative phrase).
 
-### Requirement 6: Launch Package Delivery in Chat
+**Marketing Strategy — Channel Selection**
 
-**User Story:** As a business owner, I want the complete launch package delivered as a single, clearly structured chat message, so that I can read and act on it without leaving the conversation.
+2. WHEN Phase 3 is confirmed, THE Agent SHALL evaluate two channels: LinkedIn and email.
+3. THE Agent SHALL recommend a primary channel with a rationale of no more than 50 words.
 
-#### Acceptance Criteria
+**Marketing Assets**
 
-1. WHEN all generation steps are complete, THE Agent SHALL post the Launch_Package as a single chat message in the following fixed order: (1) Offer, (2) Landing Page copy, (3) Launch Assets.
-2. THE Agent SHALL label each section with a clear heading matching the order defined in criterion 1.
-3. WHEN the Launch_Package has been posted, THE Agent SHALL invite the User to ask for refinements or adjustments to any section.
-4. IF any generation step fails, THEN THE Agent SHALL post the successfully generated sections and clearly indicate which section failed and why.
+4. WHEN the channel recommendation is made, THE Agent SHALL produce one outreach email of no more than 200 words aligned to the confirmed Offer.
+5. WHEN the channel recommendation is made, THE Agent SHALL produce one LinkedIn message of no more than 300 characters aligned to the confirmed Offer.
+6. Both assets SHALL reference the final offer statement from Phase 3.
+
+**Delivery**
+
+7. WHEN all Phase 4 content is generated, THE Agent SHALL post the complete output in a single chat message in the following order: (1) Landing Page Copy, (2) Channel Recommendation, (3) Email Asset, (4) LinkedIn Asset.
+8. Each section SHALL be clearly labelled with a heading.
+9. WHEN the full output has been posted, THE Agent SHALL invite the User to request refinements to any section.
+10. IF any generation step fails, THE Agent SHALL post the successfully generated sections and clearly indicate which section failed and why.
