@@ -283,6 +283,9 @@ export function MessageBubble({ message, canStartGeneration, onStartGeneration }
   const isSystem = message.role === "system";
   const avatarLabel = isUser ? "U" : isSystem ? "SYS" : "AI";
 
+  // validation kind is rendered by MessageList directly — skip entirely here
+  if (message.kind === "validation") return null;
+
   return (
     <article className={`message-row ${isUser ? "message-row--user" : ""}`}>
       <div
