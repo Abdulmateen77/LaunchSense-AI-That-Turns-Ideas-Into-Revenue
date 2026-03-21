@@ -38,10 +38,10 @@ REGISTRY = {
 
 DEFAULTS = {
     "research": "claude-sonnet-4-6",
-    "offer":    "claude-sonnet-4-6",
-    "builder":  "gpt-4o-mini",
-    "growth":   "gpt-4o-mini",
-    "critique": "claude-sonnet-4-6",
+    "offer":    "claude-haiku-4-5",
+    "builder":  "claude-haiku-4-5",
+    "growth":   "claude-haiku-4-5",
+    "critique": "claude-haiku-4-5",
 }
 
 

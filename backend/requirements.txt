@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+anthropic
+openai
+httpx
+python-dotenv
+pydantic
+tavily-python
+beautifulsoup4

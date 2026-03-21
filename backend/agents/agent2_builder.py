@@ -150,7 +150,7 @@ Return ONLY valid JSON matching this schema:
 
     try:
         response = client.messages.create(
-            model="claude-haiku-4-5",
+            model=model_id,
             max_tokens=3000,
             system=BUILDER_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
