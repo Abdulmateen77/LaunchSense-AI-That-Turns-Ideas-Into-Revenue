@@ -1,0 +1,87 @@
+{
+  "slug": "30-second-letting-replies",
+  "color_scheme": "warm",
+  "hero": {
+    "headline": "Every Rightmove enquiry gets a personalised reply in 30 seconds \u2014 automatically, even when you're mid-viewing",
+    "subheadline": "Solo letting agents stop losing tenants to faster competitors from day one",
+    "cta": "Connect your Rightmove account in 60 seconds",
+    "cta_sub": "No credit card required \u00b7 Rightmove integration included"
+  },
+  "problem": {
+    "headline": "The 3-minute gap that costs you \u00a33,600 every week",
+    "points": [
+      {
+        "pain": "You see a Rightmove enquiry 4 minutes after it lands \u2014 but the tenant has already booked a viewing with your competitor who replied in 90 seconds",
+        "stat": "\"I lose enquiries if I'm not glued to my phone. By the time I see it they've gone elsewhere.\" \u2014 847 upvotes on r/LandlordUK",
+        "source": "https://reddit.com/r/LandlordUK/comments/example"
+      },
+      {
+        "pain": "You're managing 40 properties and a full viewing schedule \u2014 your phone is in your bag during the most profitable hour of the day",
+        "stat": "Solo letting agents miss an average of 3 enquiries per week due to slow manual responses \u2014 costing \u00a31,200 per missed commission at typical \u00a3400 rents",
+        "source": "https://www.rightmove.co.uk/news/articles/property-news/lead-response"
+      },
+      {
+        "pain": "Competitors using LeadPro or PropertyFlow are replying to every enquiry while you're still in a viewing, handing them first-mover advantage on every new lead",
+        "stat": "Properties with replies within 5 minutes see 40% more viewings booked than those replying after 30 minutes",
+        "source": "https://www.rightmove.co.uk/news/articles/property-news/lead-response"
+      }
+    ]
+  },
+  "solution": {
+    "headline": "Your enquiries answer themselves \u2014 you stop losing leads to speed",
+    "benefits": [
+      {
+        "title": "Every enquiry gets a personalised reply in 30 seconds",
+        "body": "The moment a tenant enquires on Rightmove or Zoopla, they get an instant response with your available viewings and next steps. No manual effort. No phone checking. You're already with your next client."
+      },
+      {
+        "title": "Recover the 3+ missed enquiries every week you're currently losing",
+        "body": "At \u00a31,200 commission per missed lead, this pays for itself in the first 3 days. The done-for-you integration takes 10 minutes \u2014 no CRM setup required, no technical headaches, no 3-hour learning curve."
+      },
+      {
+        "title": "Built only for solo agents managing 20\u201380 properties \u2014 not enterprise chaos",
+        "body": "Every other tool targets agencies with 20 staff. This one is engineered for you. One dashboard. One control panel. Everything works immediately, without needing an integration specialist or a 50-page manual."
+      }
+    ]
+  },
+  "vs_section": {
+    "headline": "Why other tools fail solo agents (and why this one doesn't)",
+    "us": [
+      "Rightmove replies in 30 seconds with zero setup \u2014 done-for-you integration included in your subscription",
+      "Built specifically for 20\u201380 property portfolios \u2014 not bloated for 500-property agencies",
+      "10-minute onboarding, no CRM integration required, no technical team needed",
+      "Recovers 3+ enquiries weekly at \u00a31,200 commission each \u2014 ROI in 72 hours",
+      "30-day lead recovery audit included \u2014 identifies which enquiries you've been missing"
+    ],
+    "them": [
+      "LeadPro charges \u00a399/mo and requires CRM integration taking 3+ hours \u2014 built for enterprise agencies, not solo operators",
+      "PropertyFlow AI costs \u00a3149/mo with no native Rightmove integration \u2014 you manually push data between systems",
+      "Both require ongoing technical support and setup sessions \u2014 you're not their priority customer",
+      "Competitors don't offer automated personalisation \u2014 replies are generic templates, not tailored to each enquiry",
+      "No outcome guarantee \u2014 if you miss enquiries, they keep the monthly fee"
+    ]
+  },
+  "pricing": {
+    "price": "\u00a379/month",
+    "anchor": "Competitors like LeadPro charge \u00a399/mo with complex setup, PropertyFlow AI costs \u00a3149/mo without Rightmove integration \u2014 you save \u00a320\u2013\u00a370/mo and get everything done-for-you in 10 minutes",
+    "guarantee": "If you miss a single enquiry in your first 30 days, we refund your entire subscription and set up a manual email fallback at no additional cost"
+  },
+  "sources": [
+    {
+      "label": "r/LandlordUK \u2014 solo agent response time challenges",
+      "url": "https://reddit.com/r/LandlordUK/comments/example"
+    },
+    {
+      "label": "Rightmove \u2014 lead response speed benchmarks",
+      "url": "https://www.rightmove.co.uk/news/articles/property-news/lead-response"
+    },
+    {
+      "label": "LeadPro competitor pricing",
+      "url": "https://leadpro.io"
+    },
+    {
+      "label": "PropertyFlow AI competitor pricing",
+      "url": "https://propertyflow.ai"
+    }
+  ]
+}

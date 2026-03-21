@@ -396,6 +396,7 @@ export default function App() {
               onStartGeneration={() => startGeneration(activeThread.id)}
               onConfirmValidation={handleConfirmValidation}
               onSelectAlternative={handleSelectAlternative}
+              storedPackage={activeThread.results.storedPackage}  // ← add this one line
             />
           )}
         </section>

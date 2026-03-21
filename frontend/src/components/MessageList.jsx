@@ -1,3 +1,5 @@
+// frontend/src/components/MessageList.jsx
+
 import { useLayoutEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { ValidationCard } from "./ValidationCard";
@@ -8,7 +10,8 @@ export function MessageList({
   canStartGeneration,
   onStartGeneration,
   onConfirmValidation,
-  onSelectAlternative
+  onSelectAlternative,
+  storedPackage,          // ← add this prop
 }) {
   const listRef = useRef(null);
 
@@ -45,6 +48,7 @@ export function MessageList({
                 message={message}
                 canStartGeneration={canStartGeneration}
                 onStartGeneration={onStartGeneration}
+                storedPackage={storedPackage}   // ← pass it down
               />
             );
           })}
@@ -53,9 +57,7 @@ export function MessageList({
             <div className="message-row">
               <div className="message-avatar message-avatar--assistant">AI</div>
               <div className="typing-card" aria-label="Assistant is typing">
-                <span />
-                <span />
-                <span />
+                <span /><span /><span />
               </div>
             </div>
           ) : null}
