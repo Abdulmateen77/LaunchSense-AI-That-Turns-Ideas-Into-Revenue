@@ -36,24 +36,29 @@ Customer language (verbatim):
     # Block 3 — RAG principles converted to bullet precontext
     block3 = _format_principles(principles)
 
-    # Block 4 — output schema (unchanged from your existing OFFER_SYSTEM in agent1)
+    # Block 4 — output schema must exactly match the Pydantic Offer model
     block4 = """## BLOCK 4 — Output schema
 
 Return a single valid JSON object. No markdown fences. No text before or after.
 
 {
-  "icp": "Specific buyer, their situation, why they have this problem now.",
-  "pain_points": ["Pain 1 — moment + cost", "Pain 2 — consequence", "Pain 3 — emotional impact"],
-  "offer": "Under 80 words. What, for whom, outcome, how fast. No buzzwords.",
-  "guarantee": "Outcome-based and time-bound. One sentence.",
+  "icp": {
+    "who": "Specific person — job title, company size, situation",
+    "pain": "Quantified pain — hours lost, money wasted, or specific frustration",
+    "trigger": "The exact moment they would reach for their wallet",
+    "evidence_source": "The specific Reddit quote or competitor gap that proves this pain is real"
+  },
+  "headline": "Under 12 words. Use customer language. [Outcome] for [Person] in [Timeframe].",
+  "subheadline": "Under 25 words. Names ICP + specific result.",
+  "outcome": "What does the customer's life look like after? One sentence, measurable.",
+  "price": "Specific amount e.g. £49/mo",
+  "price_anchor": "Reference actual competitor pricing from Block 2. e.g. 'Competitors charge up to £149/mo'",
+  "guarantee": "Outcome-based and time-bound. Specific + measurable. Not '30-day money back'.",
   "bonuses": ["Bonus 1 — name + objection it removes", "Bonus 2 — name + objection it removes"],
   "urgency": "One sentence. Cost-of-inaction if no real scarcity.",
-  "headline": "Under 12 words. Use customer language.",
-  "subheadline": "Under 25 words. Names ICP + specific result.",
-  "price": "Specific amount e.g. £49/mo",
-  "price_anchor": "Reference actual competitor pricing from Block 2.",
   "cta": "Specific action verb + outcome. Not 'Get Started'.",
-  "sources_used": ["real URLs from evidence only"]
+  "competitor_gap": "One sentence. Why you win vs. the competitors in Block 2.",
+  "sources_used": ["real URLs from evidence only — no invented URLs"]
 }"""
 
     return f"""You are an expert offer engineer.
@@ -85,6 +90,11 @@ def _format_principles(principles: list[dict]) -> str:
 - Use a guarantee that shifts risk from buyer to seller.
 - Add bonuses that remove the top objection to buying.
 - Frame price against the cost of not solving the problem."""
+
+    # If the RAG service returned a pre-formatted precontext block, use it directly
+    precontext = principles[0].get("_precontext", "") if principles else ""
+    if precontext:
+        return f"## BLOCK 3 — Strategic principles\n\n{precontext}"
 
     lines = ["## BLOCK 3 — Strategic principles", ""]
     for p in principles:

@@ -134,7 +134,7 @@ Return ONLY the JSON score object."""
                 text = text[4:]
         text = text.strip()
 
-        data = json.loads(text)
+        data = json.JSONDecoder().raw_decode(text)[0]
         score = float(data.get("score", 0.0))
         action = data.get("action", "continue")
 

@@ -2,10 +2,12 @@ import json
 import os
 
 from anthropic import Anthropic
+from pathlib import Path
+
 from dotenv import load_dotenv
 from tavily import TavilyClient
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
@@ -42,7 +44,10 @@ def parse_llm_json(text: str) -> dict:
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
-    return json.loads(clean.strip())
+    clean = clean.strip()
+    decoder = json.JSONDecoder()
+    obj, _ = decoder.raw_decode(clean)
+    return obj
 
 
 def search_tavily(query: str, max_results: int = 5) -> str:

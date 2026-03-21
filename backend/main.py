@@ -1,3 +1,11 @@
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load .env relative to this file — works regardless of CWD or --app-dir
+load_dotenv(Path(__file__).parent / ".env")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

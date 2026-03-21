@@ -141,6 +141,7 @@ class Channel(BaseModel):
 class GrowthPack(BaseModel):
     cold_email: ColdEmail
     linkedin_dm: str = Field(min_length=1)
+    luffa_dm: str = Field(min_length=1)
     hooks: list[Hook] = Field(min_length=3, max_length=3)
     channel: Channel
 
@@ -162,8 +163,8 @@ class EnrichedContext(BaseModel):
     target_customer: str = Field(min_length=1)
     core_pain: str = Field(min_length=1)
     existing_solutions: str = Field(min_length=1)
-    desired_outcome: str = ""
-    notes: str = ""
+    desired_outcome: str = Field(default="")
+    notes: str = Field(default="")
 
 
 # --- GenerateRequest and ModelChoices ---

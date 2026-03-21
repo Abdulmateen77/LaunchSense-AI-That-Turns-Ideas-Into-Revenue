@@ -1,10 +1,12 @@
 import json
 import os
 
+from pathlib import Path
+
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
@@ -23,9 +25,9 @@ Your job is to craft a commercially compelling offer grounded entirely in the ma
 ## Core principles
 
 1. ANCHOR EVERY CLAIM TO EVIDENCE
-   - The ICP pain must reference a specific Reddit quote or competitor weakness from the evidence
-   - The price must be set BELOW the highest competitor price found in the evidence
-   - The guarantee must be something competitors demonstrably do NOT offer
+   - icp.evidence_source must reference a specific Reddit quote or competitor weakness from the evidence
+   - price must be set BELOW the highest competitor price found in the evidence
+   - guarantee must be something competitors demonstrably do NOT offer
    - sources_used must contain real URLs from the evidence — not invented ones
 
 2. NO GENERIC LANGUAGE
@@ -34,21 +36,20 @@ Your job is to craft a commercially compelling offer grounded entirely in the ma
    Use specific, concrete language instead. Numbers beat adjectives.
 
 3. HORMOZI OFFER STRUCTURE
-   - Dream outcome: what does the customer's life look like after?
-   - Perceived likelihood of achievement: why will this work for them specifically?
-   - Time to value: how fast do they see results?
-   - Effort and sacrifice: what do they NOT have to do anymore?
-   - Price anchoring: make the price feel like a bargain vs. the alternative
+   - outcome: what does the customer's life look like after? Measurable.
+   - icp.trigger: the exact moment they would reach for their wallet
+   - price_anchor: make the price feel like a bargain vs. competitors
+   - competitor_gap: one clear reason you win vs. the named competitors
 
-4. ICP SPECIFICITY
-   - "who" must describe a specific person, not a category
-   - "pain" must be quantified: hours lost, money wasted, or specific frustration
-   - "trigger" must be the exact moment they would reach for their wallet
-   - "evidence_source" must cite the specific Reddit quote or competitor gap that proves this pain is real
+4. ICP SPECIFICITY (nested object — not a string)
+   - icp.who: specific person, not a category
+   - icp.pain: quantified — hours lost, money wasted, or specific frustration
+   - icp.trigger: the exact moment they would reach for their wallet
+   - icp.evidence_source: cite the specific Reddit quote or competitor gap that proves this pain
 
 5. GUARANTEE RULES
    - Must be specific and measurable (not "30-day money back")
-   - Must be something competitors do NOT offer — check the competitor weaknesses
+   - Must be something competitors do NOT offer
    - Must be tied to an outcome the customer cares about
 
 6. PRICE RULES
@@ -76,7 +77,10 @@ def parse_llm_json(text: str) -> dict:
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
-    return json.loads(clean.strip())
+    clean = clean.strip()
+    decoder = json.JSONDecoder()
+    obj, _ = decoder.raw_decode(clean)
+    return obj
 
 
 async def run_offer_agent(

@@ -245,6 +245,12 @@ textarea {
   display: grid;
   gap: 0.28rem;
   min-width: 0;
+  flex: 1;
+}
+
+.chat-header__auth {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .chat-header__meta {
@@ -1146,3 +1152,14 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Markdown renderer */
+.md-body { font-size: 0.9rem; line-height: 1.7; color: var(--text); }
+.md-h1 { font-size: 1.1rem; font-weight: 700; margin: 1.2rem 0 0.4rem; }
+.md-h2 { font-size: 1rem; font-weight: 700; margin: 1rem 0 0.3rem; border-bottom: 1px solid var(--line); padding-bottom: 0.2rem; }
+.md-h3 { font-size: 0.9rem; font-weight: 600; margin: 0.8rem 0 0.2rem; color: var(--muted-strong); text-transform: uppercase; letter-spacing: 0.03em; }
+.md-p { margin: 0.4rem 0; }
+.md-ul, .md-ol { margin: 0.4rem 0 0.4rem 1.2rem; padding: 0; }
+.md-ul li, .md-ol li { margin: 0.25rem 0; }
+.md-hr { border: none; border-top: 1px solid var(--line); margin: 0.8rem 0; }
+.critique-card { width: 100%; }

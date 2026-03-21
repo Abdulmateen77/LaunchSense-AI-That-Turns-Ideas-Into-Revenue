@@ -1,10 +1,12 @@
 import { useEffect, useReducer, useRef } from "react";
+import { useUser } from "@civic/auth/react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { WelcomePanel } from "./components/WelcomePanel";
 import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage, validateIdea } from "./lib/api";
+import { loadState, saveState } from "./lib/persist";
 import {
   canStartGeneration,
   chatActionTypes,
@@ -40,6 +42,13 @@ const suggestedPrompts = [
 ];
 
 function createInitialState() {
+  const persisted = loadState();
+  if (persisted) {
+    return {
+      ...persisted,
+      backendStatus: { status: "checking" }
+    };
+  }
   return createInitialAppState({
     isSidebarCollapsed: typeof window !== "undefined" ? window.innerWidth < 860 : false
   });
@@ -49,6 +58,7 @@ export default function App() {
   const [state, dispatch] = useReducer(chatReducer, undefined, createInitialState);
   const generationControllersRef = useRef(new Map());
   const activeThread = selectActiveThread(state);
+  const { user, signIn } = useUser();
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +89,11 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  // Persist threads + sidebar state on every change
+  useEffect(() => {
+    saveState(state);
+  }, [state]);
 
   useEffect(
     () => () => {
@@ -135,6 +150,12 @@ export default function App() {
     const trimmed = value.trim();
 
     if (!trimmed || !activeThread || activeThread.busy) {
+      return false;
+    }
+
+    // Soft gate — prompt sign-in before first message
+    if (!user) {
+      await signIn();
       return false;
     }
 

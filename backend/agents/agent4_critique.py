@@ -1,9 +1,11 @@
 import os
 
+from pathlib import Path
+
 from anthropic import AsyncAnthropic
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
@@ -57,12 +59,27 @@ The one change that will most improve conversions:"""
 
 async def run_critique_agent(
     offer: Offer,
-    landing_page: LandingPage,
-    growth_pack: GrowthPack,
+    landing_page: LandingPage | None,
+    growth_pack: GrowthPack | None,
     model: str | None = None,
 ):
     """Async generator that yields str chunks of the critique."""
     model_id = resolve_model("critique", model)
+
+    lp_section = ""
+    if landing_page:
+        lp_section = f"""
+LANDING PAGE HERO:
+Headline: {landing_page.hero.headline}
+Subheadline: {landing_page.hero.subheadline}
+CTA: {landing_page.hero.cta}"""
+
+    email_section = ""
+    if growth_pack:
+        email_section = f"""
+COLD EMAIL:
+Subject: {growth_pack.cold_email.subject}
+Body preview: {growth_pack.cold_email.body[:200]}..."""
 
     user_message = f"""Review this complete launch package and provide a conversion-focused critique.
 
@@ -76,15 +93,7 @@ Guarantee: {offer.guarantee}
 CTA: {offer.cta}
 Competitor gap: {offer.competitor_gap}
 Bonuses: {offer.bonuses}
-
-LANDING PAGE HERO:
-Headline: {landing_page.hero.headline}
-Subheadline: {landing_page.hero.subheadline}
-CTA: {landing_page.hero.cta}
-
-COLD EMAIL:
-Subject: {growth_pack.cold_email.subject}
-Body preview: {growth_pack.cold_email.body[:200]}...
+{lp_section}{email_section}
 
 Provide your critique following the structure in your instructions.
 End with: "The one change that will most improve conversions:\""""
