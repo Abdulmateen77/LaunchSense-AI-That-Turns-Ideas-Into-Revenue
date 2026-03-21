@@ -1,3 +1,72 @@
+function renderMarkdown(text) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  const elements = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Horizontal rule
+    if (/^---+$/.test(line.trim())) {
+      elements.push(<hr key={i} className="md-hr" />);
+      i++;
+      continue;
+    }
+
+    // Headings
+    const h3 = line.match(/^###\s+(.*)/);
+    const h2 = line.match(/^##\s+(.*)/);
+    const h1 = line.match(/^#\s+(.*)/);
+    if (h3) { elements.push(<h3 key={i} className="md-h3">{inlineFormat(h3[1])}</h3>); i++; continue; }
+    if (h2) { elements.push(<h2 key={i} className="md-h2">{inlineFormat(h2[1])}</h2>); i++; continue; }
+    if (h1) { elements.push(<h1 key={i} className="md-h1">{inlineFormat(h1[1])}</h1>); i++; continue; }
+
+    // Bullet list — collect consecutive items
+    if (/^[-*]\s/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-*]\s/.test(lines[i])) {
+        items.push(<li key={i}>{inlineFormat(lines[i].replace(/^[-*]\s/, ""))}</li>);
+        i++;
+      }
+      elements.push(<ul key={`ul-${i}`} className="md-ul">{items}</ul>);
+      continue;
+    }
+
+    // Numbered list
+    if (/^\d+\.\s/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        items.push(<li key={i}>{inlineFormat(lines[i].replace(/^\d+\.\s/, ""))}</li>);
+        i++;
+      }
+      elements.push(<ol key={`ol-${i}`} className="md-ol">{items}</ol>);
+      continue;
+    }
+
+    // Empty line — skip
+    if (!line.trim()) { i++; continue; }
+
+    // Paragraph
+    elements.push(<p key={i} className="md-p">{inlineFormat(line)}</p>);
+    i++;
+  }
+
+  return elements;
+}
+
+function inlineFormat(text) {
+  // Split on **bold** and *italic* markers
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**"))
+      return <strong key={idx}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*"))
+      return <em key={idx}>{part.slice(1, -1)}</em>;
+    return part;
+  });
+}
+
 function DataRow({ label, value, multiline = false }) {
   if (!value) {
     return null;
@@ -261,10 +330,10 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
       );
     case "critique":
       return (
-        <>
+        <div className="critique-card">
           <p className="message-card__eyebrow">Critique</p>
-          <p className="message-card__text">{message.text}</p>
-        </>
+          <div className="md-body">{renderMarkdown(message.text)}</div>
+        </div>
       );
     case "error":
       return (
