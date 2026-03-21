@@ -1156,122 +1156,273 @@
     "principle": "Adding a bonus in direct response to a stated objection activates reciprocity: the seller has visibly made a concession, creating a psychological obligation for the buyer to move forward. Layer bonuses one at a time in response to each successive objection \u2014 people find it nearly impossible to reject an offer after repeated acts of accommodation. This is fundamentally different from pre-loading all bonuses at once, which dilutes the reciprocity effect."
   },
   {
-    "id": "outcome-003",
+    "id": "pr-001",
+    "category": "pricing",
+    "tags": [
+      "pricing",
+      "premium",
+      "value",
+      "saas",
+      "agency",
+      "margin",
+      "buyer",
+      "profit"
+    ],
+    "principle": "Set price according to the value of the result, not according to your delivery cost or competitor rates. When price is tied to transformation, higher fees become easier to justify and defend. Cost-based pricing caps growth because it ignores how much the outcome is worth to the buyer. Start by estimating the financial, emotional, or strategic value of the end result and price as a meaningful fraction of that value."
+  },
+  {
+    "id": "pr-002",
+    "category": "pricing",
+    "tags": [
+      "pricing",
+      "commodity",
+      "comparison",
+      "ecommerce",
+      "agency",
+      "discount",
+      "margin",
+      "competition"
+    ],
+    "principle": "Low prices are usually a symptom of a commoditized offer, not a pricing strategy. When buyers can easily compare you to alternatives, they default to the cheapest acceptable option. Raising price without changing the offer rarely works because the comparison frame stays the same. First make the offer harder to compare, then charge more."
+  },
+  {
+    "id": "out-001",
     "category": "outcome",
     "tags": [
-      "measurable",
-      "specific",
-      "number",
-      "timeframe",
-      "credible",
-      "claim",
-      "conversion",
+      "outcome",
+      "dream",
+      "result",
       "saas",
       "b2b",
-      "copywriting"
+      "transformation",
+      "buyer",
+      "offer"
     ],
-    "principle": "Vague outcomes produce vague desire. A specific, measurable outcome with a named timeframe is dramatically more compelling and credible than a generic promise. 'Lose twenty pounds in six weeks' outperforms 'get in shape' because it gives the prospect something concrete to visualise and evaluate. The more precisely the outcome is defined, the more the buyer can picture themselves achieving it \u2014 and the more they trust you have a real system to get them there."
+    "principle": "Sell the transformation the buyer wants, not the process you provide. People buy a better future state, not meetings, modules, or hours of labor. Define the offer in terms of the end result the buyer can imagine wanting immediately. If the outcome is vague, the offer will feel weak no matter how good the delivery is."
   },
   {
-    "id": "outcome-004",
+    "id": "out-002",
     "category": "outcome",
     "tags": [
-      "effort",
-      "sacrifice",
-      "without",
-      "remove",
-      "obstacle",
-      "ease",
-      "buyer",
-      "conversion",
-      "b2b",
-      "saas"
-    ],
-    "principle": "The most persuasive outcome statements combine what the buyer gets with what they no longer have to do or endure. 'Respond to every lead within 30 seconds without touching your phone' is more compelling than 'respond to every lead within 30 seconds' because it removes the perceived effort and sacrifice. Naming what disappears from the buyer's life is often more valuable than naming what arrives."
-  },
-  {
-    "id": "proof-003",
-    "category": "proof",
-    "tags": [
-      "specific",
-      "number",
-      "result",
-      "testimonial",
-      "credibility",
-      "named",
       "outcome",
+      "specificity",
+      "metric",
       "b2b",
+      "saas",
       "conversion",
-      "trust"
+      "promise",
+      "result"
     ],
-    "principle": "Generic testimonials have near-zero persuasion value. A testimonial that names a specific result, a timeframe, and a before-and-after state is ten to twenty times more convincing. 'I went from responding to leads in four hours to thirty seconds, and my conversion rate increased by forty percent in the first month' is a proof asset. 'Great tool, highly recommend' is noise. Collect and display only the former."
+    "principle": "Make the promised result concrete and specific. Specific outcomes are easier to value, easier to remember, and easier to believe than abstract improvement claims. Replace generic language with measurable or vividly defined change wherever possible. Precision turns desire into a clearer buying decision."
   },
   {
-    "id": "proof-004",
-    "category": "proof",
+    "id": "out-003",
+    "category": "outcome",
     "tags": [
-      "voice",
-      "customer",
-      "language",
-      "mirror",
-      "copy",
-      "quote",
-      "verbatim",
-      "research",
-      "conversion",
-      "positioning"
-    ],
-    "principle": "The most persuasive copy is written in the exact words customers use to describe their own problem \u2014 not the words you use to describe your solution. Mine reviews, forum threads, support tickets, and sales calls for verbatim language. When a prospect reads copy that uses their own internal monologue, they feel immediately understood \u2014 and trust follows understanding faster than any other sequence. Use their words, not yours."
-  },
-  {
-    "id": "proof-005",
-    "category": "proof",
-    "tags": [
+      "outcome",
       "before",
       "after",
-      "contrast",
-      "transformation",
-      "visual",
-      "case",
-      "study",
+      "copy",
+      "agency",
+      "saas",
+      "buyer",
+      "transformation"
+    ],
+    "principle": "Frame the offer as a movement from an unwanted current state to a desired future state. Buyers feel the value more clearly when they can compare life before and after the solution. This contrast makes the transformation easier to visualize and therefore easier to purchase. State both sides of the change in plain language."
+  },
+  {
+    "id": "out-004",
+    "category": "outcome",
+    "tags": [
+      "outcome",
+      "segment",
+      "avatar",
       "b2b",
-      "saas",
-      "conversion"
+      "niche",
+      "pain",
+      "desire",
+      "offer"
     ],
-    "principle": "Before-and-after proof structures are more persuasive than outcome-only statements because they make the transformation visible. The contrast between the starting state and the result state is what creates desire \u2014 the prospect maps their own before onto the example and projects themselves into the after. Document the worst starting conditions possible: a client who was most like the buyer before they started creates the most relatable and compelling proof."
+    "principle": "Different audiences want different versions of the same broad outcome. A strong offer chooses the exact transformation that matters most to one segment and expresses it in that segment's language. Do not promise every possible benefit to every possible buyer. Narrow the promised result until one group sees it as made for them."
   },
   {
-    "id": "cta-003",
-    "category": "cta",
+    "id": "pa-001",
+    "category": "pain",
     "tags": [
-      "friction",
-      "reduce",
-      "next",
-      "step",
-      "simple",
-      "action",
-      "commitment",
-      "onboarding",
-      "saas",
-      "conversion"
-    ],
-    "principle": "The CTA should describe the smallest possible commitment that moves the buyer forward, not the full purchase. The larger the perceived commitment in the CTA, the more hesitation it creates. 'See your first automated reply in 60 seconds' produces less resistance than 'start your subscription'. Match the size of the ask to where the buyer is in their decision \u2014 early-stage buyers need micro-commitments, not macro ones."
-  },
-  {
-    "id": "offer_stack-004",
-    "category": "offer_stack",
-    "tags": [
-      "sequence",
-      "reveal",
-      "order",
-      "presentation",
-      "core",
-      "bonus",
-      "last",
+      "pain",
+      "problem",
+      "copy",
+      "b2b",
+      "buyer",
+      "frustration",
       "conversion",
-      "b2b",
+      "lead"
+    ],
+    "principle": "Start with painful problems, not nice-to-have improvements. Buyers move faster when the cost of staying the same feels unacceptable. If the problem is mild, the offer must fight indifference as well as competition. Build offers around problems people urgently want removed."
+  },
+  {
+    "id": "pa-002",
+    "category": "pain",
+    "tags": [
+      "pain",
+      "articulation",
+      "copy",
+      "saas",
+      "agency",
+      "buyer",
+      "understood",
       "close"
     ],
-    "principle": "Present the core offer first, assign it a price, then add each bonus with its own price and justification. Never reveal the actual price until the full stack has been presented. By the time the real price appears, the buyer's mental anchor is the cumulative stated value \u2014 which should be three to five times the actual price. The sequence matters: revealing the price before the stack destroys the anchoring effect entirely."
+    "principle": "Describe the buyer's pain in language they would use themselves. Accurate articulation creates the feeling of being understood, which increases trust and attention. When buyers feel precisely seen, they assume the solution is also likely to fit. Good persuasion starts with diagnosis, not hype."
+  },
+  {
+    "id": "pa-003",
+    "category": "pain",
+    "tags": [
+      "pain",
+      "agitation",
+      "inaction",
+      "b2b",
+      "cost",
+      "buyer",
+      "urgency",
+      "offer"
+    ],
+    "principle": "Do not only name the problem; show the consequences of leaving it unsolved. Pain becomes more commercially useful when the buyer sees what it is already costing in money, time, stress, or missed opportunities. This raises urgency without artificial pressure. Make inaction expensive in the buyer's mind by telling the truth about the current loss."
+  },
+  {
+    "id": "po-001",
+    "category": "positioning",
+    "tags": [
+      "positioning",
+      "category",
+      "one",
+      "saas",
+      "agency",
+      "comparison",
+      "buyer",
+      "premium"
+    ],
+    "principle": "Position the offer so it competes against doing nothing, not against a list of similar vendors. The goal is to create a category of one where direct comparison becomes difficult. When buyers cannot easily line you up against substitutes, price pressure drops and value perception rises. Different framing is often more powerful than better explanation."
+  },
+  {
+    "id": "stk-001",
+    "category": "offer_stack",
+    "tags": [
+      "stack",
+      "bundle",
+      "value",
+      "saas",
+      "agency",
+      "anchor",
+      "buyer",
+      "premium"
+    ],
+    "principle": "Bundle multiple relevant components into one coherent offer so the total perceived value exceeds the headline promise alone. A stack works best when each element removes a specific obstacle on the path to the outcome. Buyers should feel they are getting a complete solution rather than a single isolated service. Every added element should answer the question of what might stop success."
+  },
+  {
+    "id": "stk-002",
+    "category": "offer_stack",
+    "tags": [
+      "stack",
+      "sequence",
+      "logic",
+      "service",
+      "saas",
+      "onboarding",
+      "buyer",
+      "completion"
+    ],
+    "principle": "Arrange the stack in the order the buyer will use it or benefit from it. Logical sequencing helps the buyer understand how the parts work together and why the offer is comprehensive. Random piles of features look inflated, while a staged progression looks engineered. Present the stack as a path, not a heap."
+  },
+  {
+    "id": "pf-001",
+    "category": "proof",
+    "tags": [
+      "proof",
+      "testimonial",
+      "trust",
+      "saas",
+      "buyer",
+      "results",
+      "conversion",
+      "credibility"
+    ],
+    "principle": "Use proof to demonstrate that the offer has already produced the promised result for others. Buyers borrow certainty from evidence when they lack personal experience with you. Proof reduces the mental leap required to believe the promise. Put evidence close to the claim it supports."
+  },
+  {
+    "id": "pf-002",
+    "category": "proof",
+    "tags": [
+      "proof",
+      "specific",
+      "numbers",
+      "b2b",
+      "saas",
+      "testimonial",
+      "buyer",
+      "case"
+    ],
+    "principle": "Specific proof outperforms generic praise. Concrete numbers, timelines, before-and-after changes, and context make the evidence easier to trust and value. Vague compliments create social warmth but weak commercial certainty. Ask for proof that shows what changed, by how much, and for whom."
+  },
+  {
+    "id": "pf-003",
+    "category": "proof",
+    "tags": [
+      "proof",
+      "relevance",
+      "avatar",
+      "b2b",
+      "case",
+      "saas",
+      "buyer",
+      "niche"
+    ],
+    "principle": "Use proof from people who resemble the target buyer in industry, problem, or situation. Relevance matters because buyers want evidence that the offer works for someone like them, not merely for someone somewhere. Match testimonials and examples to the audience segment seeing the offer. Similarity increases transfer of belief."
+  },
+  {
+    "id": "pf-004",
+    "category": "proof",
+    "tags": [
+      "proof",
+      "process",
+      "authority",
+      "service",
+      "saas",
+      "buyer",
+      "credibility",
+      "expertise"
+    ],
+    "principle": "Proof can also come from demonstrating a repeatable process, not only end results. When buyers see a clear method, framework, or system, they infer competence and consistency. Process proof is especially useful when direct case studies are limited. Show that success comes from a mechanism you understand, not from luck."
+  },
+  {
+    "id": "cta-001",
+    "category": "cta",
+    "tags": [
+      "cta",
+      "nextstep",
+      "commitment",
+      "buyer",
+      "conversion",
+      "lead",
+      "booking",
+      "close"
+    ],
+    "principle": "End every offer with a clear next step that tells the buyer exactly how to proceed. Confusion after desire kills conversion because momentum fades quickly. Ask for one concrete action such as booking a call, paying a deposit, or starting onboarding. The call to action should match the commitment level the buyer is ready to make."
+  },
+  {
+    "id": "cta-002",
+    "category": "cta",
+    "tags": [
+      "cta",
+      "friction",
+      "simple",
+      "saas",
+      "signup",
+      "buyer",
+      "conversion",
+      "onboarding"
+    ],
+    "principle": "Reduce friction in the call to action by minimizing extra steps, choices, and uncertainty. A good CTA feels like a natural continuation of the offer rather than a new decision. Remove unnecessary fields, unclear instructions, and hidden process details. Make starting as easy as buying sounded."
   }
 ]
