@@ -1,10 +1,14 @@
 import { useLayoutEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { ValidationCard } from "./ValidationCard";
+import { GenerationProgress } from "./GenerationProgress";
+import { THREAD_MODES } from "../lib/contracts";
 
 export function MessageList({
   messages,
   isBusy,
+  phase,
+  stage,
   canStartGeneration,
   onStartGeneration,
   onConfirmValidation,
@@ -48,6 +52,15 @@ export function MessageList({
               />
             );
           })}
+
+          {phase === THREAD_MODES.GENERATING ? (
+            <div className="message-row">
+              <div className="message-avatar message-avatar--assistant">AI</div>
+              <div className="message-card message-card--assistant" style={{ maxWidth: "calc(100% - 3rem)", width: "100%" }}>
+                <GenerationProgress stage={stage} />
+              </div>
+            </div>
+          ) : null}
 
           {isBusy ? (
             <div className="message-row">

@@ -22,6 +22,28 @@ function CopyButton({ text, label = "Copy" }) {
   );
 }
 
+function CollapsibleSection({ title, children, copyText = null, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <section className="structured-section">
+      <div className="structured-section__header">
+        <button
+          type="button"
+          className="collapsible-toggle"
+          onClick={() => setOpen(o => !o)}
+          aria-expanded={open}
+        >
+          <span className={`collapsible-toggle__chevron ${open ? "collapsible-toggle__chevron--open" : ""}`}>▸</span>
+          <h3>{title}</h3>
+        </button>
+        {copyText && open ? <CopyButton label="Copy" text={copyText} /> : null}
+      </div>
+      {open ? <div className="collapsible-body">{children}</div> : null}
+    </section>
+  );
+}
+
 function renderMarkdown(text) {
   if (!text) return null;
   const lines = text.split("\n");
@@ -280,68 +302,50 @@ function renderAssetsCard(message) {
       <p className="message-card__eyebrow">Assets</p>
 
       {page ? (
-        <section className="structured-section">
-          <h3>Landing Page</h3>
+        <CollapsibleSection title="Landing Page">
           <DataRow label="Slug" value={page.slug} />
           <LinkRow label="Stored package URL" href={page.absoluteUrl || page.url} />
-        </section>
+        </CollapsibleSection>
       ) : null}
 
       {growth?.channel ? (
-        <section className="structured-section">
-          <h3>Channel Recommendation</h3>
+        <CollapsibleSection title="Channel Recommendation">
           <DataRow label="Pick" value={growth.channel.pick} />
           <DataRow label="Why" value={growth.channel.why} multiline />
           <DataRow label="Action" value={growth.channel.action} multiline />
-        </section>
+        </CollapsibleSection>
       ) : null}
 
       {growth?.cold_email ? (
-        <section className="structured-section">
-          <div className="structured-section__header">
-            <h3>Cold Email</h3>
-            <CopyButton
-              label="Copy email"
-              text={`Subject: ${growth.cold_email.subject}\n\n${growth.cold_email.body}\n\nPS: ${growth.cold_email.ps}`}
-            />
-          </div>
+        <CollapsibleSection
+          title="Cold Email"
+          copyText={`Subject: ${growth.cold_email.subject}\n\n${growth.cold_email.body}\n\nPS: ${growth.cold_email.ps}`}
+        >
           <DataRow label="Subject" value={growth.cold_email.subject} multiline />
           <DataRow label="Body" value={growth.cold_email.body} multiline />
           <DataRow label="Evidence line" value={growth.cold_email.evidence_line} multiline />
           <LinkRow label="Evidence URL" href={growth.cold_email.evidence_url} />
           <DataRow label="PS" value={growth.cold_email.ps} multiline />
-        </section>
+        </CollapsibleSection>
       ) : null}
 
       {growth?.linkedin_dm ? (
-        <section className="structured-section">
-          <div className="structured-section__header">
-            <h3>LinkedIn DM</h3>
-            <CopyButton label="Copy DM" text={growth.linkedin_dm} />
-          </div>
+        <CollapsibleSection title="LinkedIn DM" copyText={growth.linkedin_dm}>
           <p className="message-card__pre">{growth.linkedin_dm}</p>
-        </section>
+        </CollapsibleSection>
       ) : null}
 
       {growth?.luffa_dm ? (
-        <section className="structured-section">
-          <div className="structured-section__header">
-            <h3>Luffa DM</h3>
-            <CopyButton label="Copy DM" text={growth.luffa_dm} />
-          </div>
+        <CollapsibleSection title="Luffa DM" copyText={growth.luffa_dm}>
           <p className="message-card__pre">{growth.luffa_dm}</p>
-        </section>
+        </CollapsibleSection>
       ) : null}
 
       {Array.isArray(growth?.hooks) && growth.hooks.length ? (
-        <section className="structured-section">
-          <div className="structured-section__header">
-            <h3>Hooks</h3>
-            <CopyButton
-              label="Copy all"
-              text={growth.hooks.map(h => `[${h.platform}]\n${h.hook}`).join("\n\n")}
-            />
-          </div>
+        <CollapsibleSection
+          title="Hooks"
+          copyText={growth.hooks.map(h => `[${h.platform}]\n${h.hook}`).join("\n\n")}
+        >
           <ul className="structured-list">
             {growth.hooks.map((hook) => (
               <li key={`${hook.platform}-${hook.hook}`}>
@@ -351,7 +355,7 @@ function renderAssetsCard(message) {
               </li>
             ))}
           </ul>
-        </section>
+        </CollapsibleSection>
       ) : null}
     </div>
   );

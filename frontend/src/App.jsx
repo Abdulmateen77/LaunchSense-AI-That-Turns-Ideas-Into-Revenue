@@ -413,6 +413,8 @@ export default function App() {
             <MessageList
               messages={activeThread.messages}
               isBusy={activeThread.busy}
+              phase={activeThread.phase}
+              stage={activeThread.stage}
               canStartGeneration={canStartGeneration(activeThread)}
               onStartGeneration={() => startGeneration(activeThread.id)}
               onConfirmValidation={handleConfirmValidation}

@@ -1199,3 +1199,121 @@ textarea {
   background: #ecfdf3;
   border-color: #bbf7d0;
 }
+
+/* ── Collapsible sections ────────────────────────────────────── */
+
+.collapsible-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+}
+
+.collapsible-toggle h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.collapsible-toggle__chevron {
+  font-size: 0.7rem;
+  color: var(--muted);
+  transition: transform 150ms ease;
+  display: inline-block;
+}
+
+.collapsible-toggle__chevron--open {
+  transform: rotate(90deg);
+}
+
+.collapsible-body {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+/* ── Generation progress bar ─────────────────────────────────── */
+
+.gen-progress {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.25rem 0;
+  width: 100%;
+}
+
+.gen-progress__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  gap: 0.4rem;
+}
+
+.gen-progress__dot {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  border: 2px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.gen-progress__step--done .gen-progress__dot {
+  background: #166534;
+  border-color: #166534;
+  color: #ffffff;
+}
+
+.gen-progress__step--active .gen-progress__dot {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+.gen-progress__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.gen-progress__step--active .gen-progress__label {
+  color: var(--text);
+}
+
+.gen-progress__step--done .gen-progress__label {
+  color: #166534;
+}
+
+.gen-progress__line {
+  position: absolute;
+  top: 0.875rem;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line-strong);
+  z-index: 0;
+}
+
+.gen-progress__step--done .gen-progress__line {
+  background: #166534;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
