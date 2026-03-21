@@ -16,7 +16,7 @@ function ArrowIcon() {
   );
 }
 
-export function Composer({ onSend, disabled }) {
+export function Composer({ onSend, disabled, placeholder }) {
   const [value, setValue] = useState("");
   const textareaRef = useRef(null);
 
@@ -31,16 +31,19 @@ export function Composer({ onSend, disabled }) {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
   }, [value]);
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    onSend(value);
-    setValue("");
+    const didSend = await onSend(value);
+
+    if (didSend !== false) {
+      setValue("");
+    }
   }
 
   function handleKeyDown(event) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      submit(event);
+      void submit(event);
     }
   }
 
@@ -57,7 +60,7 @@ export function Composer({ onSend, disabled }) {
             ref={textareaRef}
             rows="1"
             value={value}
-            placeholder="Send a message..."
+            placeholder={placeholder}
             onChange={(event) => setValue(event.target.value)}
             onKeyDown={handleKeyDown}
             disabled={disabled}

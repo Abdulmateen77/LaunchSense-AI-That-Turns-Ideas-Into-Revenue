@@ -1,0 +1,112 @@
+{
+  "source": "/C:/Users/fairc/dev/launchsense/frontend/FRONTEND_IMPLEMENTATION.md",
+  "generated_on": "2026-03-21",
+  "tasks": [
+    {
+      "id": "preserve-shell",
+      "title": "Keep the existing chat shell and avoid a major UI rewrite",
+      "status": "completed",
+      "source_section": "Keep the Current Frontend Shell",
+      "verification": {
+        "type": "code-review",
+        "evidence": [
+          "/C:/Users/fairc/dev/launchsense/frontend/src/App.jsx",
+          "/C:/Users/fairc/dev/launchsense/frontend/src/components/Sidebar.jsx",
+          "/C:/Users/fairc/dev/launchsense/frontend/src/components/ChatHeader.jsx",
+          "/C:/Users/fairc/dev/launchsense/frontend/src/components/MessageList.jsx",
+          "/C:/Users/fairc/dev/launchsense/frontend/src/components/Composer.jsx"
+        ]
+      }
+    },
+    {
+      "id": "health-connection-state",
+      "title": "Wire GET /health into frontend connection state and show it in the header",
+      "status": "pending",
+      "source_section": "Implementation Flow / App Load",
+      "verification": {
+        "type": "build-and-runtime-check",
+        "notes": "Header should show connected or unavailable state without changing layout."
+      }
+    },
+    {
+      "id": "thread-session-state",
+      "title": "Extend thread state with backend session id, phase, status, context, results, and error state",
+      "status": "pending",
+      "source_section": "Recommended State Model",
+      "verification": {
+        "type": "code-review",
+        "notes": "Each local thread should independently track backend intake/generation state."
+      }
+    },
+    {
+      "id": "intake-api-client",
+      "title": "Add API helpers for health, intake, generation stream, and stored package fetch",
+      "status": "pending",
+      "source_section": "API Client Notes",
+      "verification": {
+        "type": "build-and-code-review",
+        "notes": "Use fetch for JSON routes and fetch plus stream parsing for POST SSE."
+      }
+    },
+    {
+      "id": "intake-chat-flow",
+      "title": "Replace local canned replies with POST /intake/message and persist session_id per thread",
+      "status": "pending",
+      "source_section": "Implementation Flow / Intake Conversation",
+      "verification": {
+        "type": "build-and-runtime-check",
+        "notes": "User messages should drive the live intake loop and support follow-up questions."
+      }
+    },
+    {
+      "id": "context-summary-and-generate-action",
+      "title": "Render the completed context as an inline summary card and expose a Generate launch package action",
+      "status": "pending",
+      "source_section": "Implementation Flow / Context Confirmation",
+      "verification": {
+        "type": "code-review-and-build",
+        "notes": "Keep the action inline in the thread rather than introducing a new screen."
+      }
+    },
+    {
+      "id": "generate-sse-stream",
+      "title": "Implement POST /generate SSE parsing and phase updates from streamed events",
+      "status": "pending",
+      "source_section": "Implementation Flow / Generation Stream",
+      "verification": {
+        "type": "build-and-runtime-check",
+        "notes": "Thread phase and status should react to status, research, eval, offer, page, growth, critique_chunk, complete, and error events."
+      }
+    },
+    {
+      "id": "structured-thread-rendering",
+      "title": "Render context, research, offer, assets, critique, and error states inside the existing thread surface",
+      "status": "pending",
+      "source_section": "Progressive Rendering",
+      "verification": {
+        "type": "build-and-code-review",
+        "notes": "Structured outputs should appear without replacing the current conversation layout."
+      }
+    },
+    {
+      "id": "stored-package-rehydration",
+      "title": "Support GET /p/{slug} retrieval after completion and store backend-relative plus absolute page URLs",
+      "status": "pending",
+      "source_section": "Final Retrieval",
+      "verification": {
+        "type": "code-review-and-runtime-check",
+        "notes": "Treat /p/{slug} as stored JSON retrieval, not as a separate rendered frontend page."
+      }
+    },
+    {
+      "id": "integration-verification",
+      "title": "Verify the frontend builds cleanly and the backend integration points are wired end to end",
+      "status": "pending",
+      "source_section": "Success Criteria",
+      "verification": {
+        "type": "build-and-manual-check",
+        "notes": "Run a production build and, if the backend is available locally, exercise the health and intake/generation flows."
+      }
+    }
+  ]
+}

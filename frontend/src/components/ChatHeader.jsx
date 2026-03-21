@@ -10,7 +10,19 @@ function PanelIcon() {
   );
 }
 
-export function ChatHeader({ title, onToggleSidebar }) {
+function getBackendStatusCopy(status) {
+  if (status === "connected") {
+    return "Backend connected";
+  }
+
+  if (status === "unavailable") {
+    return "Backend unavailable";
+  }
+
+  return "Checking backend";
+}
+
+export function ChatHeader({ title, backendStatus, threadStatus, onToggleSidebar }) {
   return (
     <header className="chat-header">
       <button type="button" className="chat-header__toggle" onClick={onToggleSidebar} aria-label="Toggle sidebar">
@@ -19,6 +31,20 @@ export function ChatHeader({ title, onToggleSidebar }) {
 
       <div className="chat-header__title-group">
         <span className="chat-header__title">{title}</span>
+
+        <div className="chat-header__meta">
+          <span className={`status-pill status-pill--${backendStatus || "checking"}`}>
+            {getBackendStatusCopy(backendStatus)}
+          </span>
+
+          {threadStatus?.label ? (
+            <span className={`status-pill status-pill--${threadStatus.tone || "checking"}`}>
+              {threadStatus.label}
+            </span>
+          ) : null}
+        </div>
+
+        {threadStatus?.detail ? <span className="chat-header__status">{threadStatus.detail}</span> : null}
       </div>
     </header>
   );

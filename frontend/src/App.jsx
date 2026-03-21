@@ -1,188 +1,331 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { WelcomePanel } from "./components/WelcomePanel";
+import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage } from "./lib/api";
+import {
+  canStartGeneration,
+  chatActionTypes,
+  chatReducer,
+  createInitialAppState,
+  formatError,
+  getComposerPlaceholder,
+  getThreadStatus,
+  isComposerDisabled,
+  isConnectionFailure,
+  selectActiveThread
+} from "./lib/chatState";
+import { STREAM_EVENTS, THREAD_MODES } from "./lib/contracts";
+import { streamGeneration } from "./lib/sse";
 
 const suggestedPrompts = [
   {
-    title: "Build a product requirements outline",
-    label: "Create a clean PRD structure for a team dashboard MVP."
+    title: "AI service for consultants",
+    label: "I run a consulting practice for HR teams and want to launch an AI onboarding audit service."
   },
   {
-    title: "Explain a React pattern",
-    label: "Show me when to use controlled inputs versus uncontrolled ones."
+    title: "New offer for agencies",
+    label: "I own a small estate agency and want to launch an AI property listing package for solo agents."
   },
   {
-    title: "Draft launch copy",
-    label: "Write homepage messaging for an AI note taking app."
+    title: "Productized coaching offer",
+    label: "I help founders with sales coaching and want a fixed launch sprint for pre-seed SaaS teams."
   },
   {
-    title: "Plan a migration",
-    label: "Map a phased migration from REST endpoints to GraphQL."
+    title: "Digital service idea",
+    label: "I run a bookkeeping business and want to offer a monthly cash-flow forecast service for freelancers."
   }
 ];
 
-const cannedReplies = [
-  "This frontend-only clone keeps the interaction model local, but the component structure is ready to plug into a real chat backend later.",
-  "A strong next step would be wiring message persistence and thread loading into the same layout without changing the UI layer.",
-  "If you want this even closer to the Vercel template, the next polish pass would be keyboard shortcuts, thread grouping, and a richer empty-state composer.",
-  "The main shell now follows the same sidebar, welcome state, and docked composer pattern while staying backend-free."
-];
-
-function createMessage(role, text) {
-  return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    role,
-    text
-  };
+function createInitialState() {
+  return createInitialAppState({
+    isSidebarCollapsed: typeof window !== "undefined" ? window.innerWidth < 860 : false
+  });
 }
-
-function createEmptyThread(index) {
-  return {
-    id: `thread-${Date.now()}-${index}`,
-    title: "New chat",
-    preview: "",
-    updatedAt: "Just now",
-    messages: []
-  };
-}
-
-function buildTitle(text) {
-  const compact = text.replace(/\s+/g, " ").trim();
-  return compact.length > 34 ? `${compact.slice(0, 31)}...` : compact;
-}
-
-function moveThreadToTop(threads, threadId, updater) {
-  const thread = threads.find((item) => item.id === threadId);
-
-  if (!thread) {
-    return threads;
-  }
-
-  const updated = updater(thread);
-  return [updated, ...threads.filter((item) => item.id !== threadId)];
-}
-
-const initialThreads = [
-  createEmptyThread(1),
-  {
-    id: "thread-ui-clone",
-    title: "Clone the Vercel chatbot UI",
-    preview: "Recreate the frontend only, without any backend logic.",
-    updatedAt: "Earlier",
-    messages: [
-      createMessage("user", "Clone the Vercel chatbot UI, but keep it frontend only."),
-      createMessage(
-        "assistant",
-        "I can mirror the layout and interaction patterns with local state, then leave the backend integration for later."
-      )
-    ]
-  },
-  {
-    id: "thread-react-help",
-    title: "React layout question",
-    preview: "How would you structure a split-pane workspace in React?",
-    updatedAt: "Yesterday",
-    messages: [
-      createMessage("user", "How would you structure a split-pane workspace in React?"),
-      createMessage(
-        "assistant",
-        "Start with a shell layout component, keep pane state at the top level, and treat navigation and content as separate composable surfaces."
-      )
-    ]
-  }
-];
 
 export default function App() {
-  const [threads, setThreads] = useState(initialThreads);
-  const [activeThreadId, setActiveThreadId] = useState(initialThreads[0].id);
-  const [isReplying, setIsReplying] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 860 : false
-  );
-  const replyIndex = useRef(0);
-
-  const activeThread = useMemo(
-    () => threads.find((thread) => thread.id === activeThreadId) ?? threads[0],
-    [activeThreadId, threads]
-  );
+  const [state, dispatch] = useReducer(chatReducer, undefined, createInitialState);
+  const generationControllersRef = useRef(new Map());
+  const activeThread = selectActiveThread(state);
 
   useEffect(() => {
-    if (!isReplying || !activeThread) {
-      return undefined;
+    let cancelled = false;
+
+    async function loadHealth() {
+      try {
+        await getHealth();
+
+        if (!cancelled) {
+          dispatch({
+            type: chatActionTypes.SET_BACKEND_STATUS,
+            payload: { status: "connected" }
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          dispatch({
+            type: chatActionTypes.SET_BACKEND_STATUS,
+            payload: { status: "unavailable" }
+          });
+        }
+      }
     }
 
-    const threadId = activeThread.id;
-    const timeoutId = window.setTimeout(() => {
-      const reply = cannedReplies[replyIndex.current % cannedReplies.length];
-      replyIndex.current += 1;
+    void loadHealth();
 
-      setThreads((currentThreads) =>
-        moveThreadToTop(currentThreads, threadId, (thread) => ({
-          ...thread,
-          preview: reply,
-          updatedAt: "Just now",
-          messages: [...thread.messages, createMessage("assistant", reply)]
-        }))
-      );
-      setIsReplying(false);
-    }, 900);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [activeThread, isReplying]);
+  useEffect(
+    () => () => {
+      generationControllersRef.current.forEach(({ controller, timeoutId }) => {
+        controller.abort();
 
-  function handleSelectThread(threadId) {
-    setActiveThreadId(threadId);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      });
 
-    if (typeof window !== "undefined" && window.innerWidth < 860) {
-      setIsSidebarCollapsed(true);
-    }
-  }
+      generationControllersRef.current.clear();
+    },
+    []
+  );
 
-  function handleSendMessage(value) {
-    const trimmed = value.trim();
+  function clearGenerationController(threadId) {
+    const entry = generationControllersRef.current.get(threadId);
 
-    if (!trimmed || !activeThread || isReplying) {
+    if (!entry) {
       return;
     }
 
-    setThreads((currentThreads) =>
-      moveThreadToTop(currentThreads, activeThread.id, (thread) => ({
-        ...thread,
-        title: thread.messages.length === 0 ? buildTitle(trimmed) : thread.title,
-        preview: trimmed,
-        updatedAt: "Just now",
-        messages: [...thread.messages, createMessage("user", trimmed)]
-      }))
-    );
+    if (entry.timeoutId) {
+      clearTimeout(entry.timeoutId);
+    }
 
-    setIsReplying(true);
+    generationControllersRef.current.delete(threadId);
+  }
+
+  function collapseSidebarOnMobile() {
+    if (typeof window !== "undefined" && window.innerWidth < 860) {
+      dispatch({
+        type: chatActionTypes.SET_SIDEBAR_COLLAPSED,
+        value: true
+      });
+    }
+  }
+
+  function handleSelectThread(threadId) {
+    dispatch({
+      type: chatActionTypes.SELECT_THREAD,
+      threadId
+    });
+    collapseSidebarOnMobile();
   }
 
   function handleNewChat() {
-    if (isReplying) {
+    dispatch({ type: chatActionTypes.CREATE_NEW_CHAT });
+    collapseSidebarOnMobile();
+  }
+
+  async function handleSendMessage(value) {
+    const trimmed = value.trim();
+
+    if (!trimmed || !activeThread || activeThread.busy) {
+      return false;
+    }
+
+    if (activeThread.phase === THREAD_MODES.CONTEXT_READY) {
+      dispatch({
+        type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
+        threadId: activeThread.id,
+        message: trimmed,
+        requestKind: "context"
+      });
+      return true;
+    }
+
+    if (activeThread.phase === THREAD_MODES.COMPLETE) {
+      dispatch({
+        type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
+        threadId: activeThread.id,
+        message: trimmed,
+        requestKind: "refinement"
+      });
+      return true;
+    }
+
+    if (activeThread.phase === THREAD_MODES.ERROR && activeThread.context) {
+      dispatch({
+        type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
+        threadId: activeThread.id,
+        message: trimmed,
+        requestKind:
+          activeThread.results.offer || activeThread.results.page || activeThread.results.growth
+            ? "refinement"
+            : "context"
+      });
+      return true;
+    }
+
+    if (activeThread.phase !== THREAD_MODES.WELCOME && activeThread.phase !== THREAD_MODES.INTAKE) {
+      return false;
+    }
+
+    const threadId = activeThread.id;
+
+    dispatch({
+      type: chatActionTypes.INTAKE_REQUEST_STARTED,
+      threadId,
+      message: trimmed
+    });
+
+    try {
+      const response = await sendIntakeMessage({
+        session_id: activeThread.sessionId,
+        message: trimmed
+      });
+
+      dispatch({
+        type: chatActionTypes.SET_BACKEND_STATUS,
+        payload: { status: "connected" }
+      });
+
+      dispatch({
+        type: chatActionTypes.INTAKE_RESPONSE_RECEIVED,
+        threadId,
+        response
+      });
+    } catch (error) {
+      const errorMessage = formatError(error);
+
+      if (isConnectionFailure(errorMessage)) {
+        dispatch({
+          type: chatActionTypes.SET_BACKEND_STATUS,
+          payload: { status: "unavailable" }
+        });
+      }
+
+      dispatch({
+        type: chatActionTypes.THREAD_ERROR_RECORDED,
+        threadId,
+        errorMessage
+      });
+    }
+
+    return true;
+  }
+
+  async function startGeneration(threadId = activeThread?.id) {
+    if (!threadId) {
       return;
     }
 
-    const thread = createEmptyThread(threads.length + 1);
-    setThreads((currentThreads) => [thread, ...currentThreads]);
-    setActiveThreadId(thread.id);
+    const thread = state.threads.find((item) => item.id === threadId);
 
-    if (typeof window !== "undefined" && window.innerWidth < 860) {
-      setIsSidebarCollapsed(true);
+    if (!thread || !thread.context || thread.busy) {
+      return;
+    }
+
+    dispatch({
+      type: chatActionTypes.GENERATION_STARTED,
+      threadId
+    });
+
+    try {
+      clearGenerationController(threadId);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 90000);
+
+      generationControllersRef.current.set(threadId, {
+        controller,
+        timeoutId
+      });
+
+      await streamGeneration(
+        {
+          idea: thread.context.idea,
+          context: thread.context
+        },
+        {
+          signal: controller.signal,
+          onEvent: async (eventName, data) => {
+            const nextData =
+              eventName === STREAM_EVENTS.PAGE && data?.url
+                ? {
+                    ...data,
+                    absoluteUrl: buildAbsolutePackageUrl(data.url)
+                  }
+                : data;
+
+            dispatch({
+              type: chatActionTypes.GENERATION_EVENT_RECEIVED,
+              threadId,
+              eventName,
+              data: nextData,
+              absoluteUrl:
+                eventName === STREAM_EVENTS.COMPLETE && data?.slug
+                  ? buildAbsolutePackageUrl(`/p/${data.slug}`)
+                  : null
+            });
+
+            if (eventName === STREAM_EVENTS.COMPLETE && data?.slug) {
+              try {
+                const storedPackage = await fetchStoredPackage(data.slug);
+
+                dispatch({
+                  type: chatActionTypes.STORED_PACKAGE_RECEIVED,
+                  threadId,
+                  storedPackage
+                });
+              } catch {
+                // Stored package retrieval is optional. Keep streamed results intact if it fails.
+              }
+            }
+          }
+        }
+      );
+
+      clearGenerationController(threadId);
+
+      dispatch({
+        type: chatActionTypes.SET_BACKEND_STATUS,
+        payload: { status: "connected" }
+      });
+    } catch (error) {
+      clearGenerationController(threadId);
+
+      const errorMessage = formatError(error);
+
+      if (isConnectionFailure(errorMessage)) {
+        dispatch({
+          type: chatActionTypes.SET_BACKEND_STATUS,
+          payload: { status: "unavailable" }
+        });
+      }
+
+      dispatch({
+        type: chatActionTypes.THREAD_ERROR_RECORDED,
+        threadId,
+        errorMessage
+      });
     }
   }
 
-  const isEmptyState = activeThread.messages.length === 0;
+  const isEmptyState = activeThread?.messages.length === 0;
 
   return (
-    <div className={`app-shell ${isSidebarCollapsed ? "app-shell--collapsed" : ""}`}>
+    <div className={`app-shell ${state.isSidebarCollapsed ? "app-shell--collapsed" : ""}`}>
       <Sidebar
-        threads={threads}
-        activeThreadId={activeThreadId}
-        isCollapsed={isSidebarCollapsed}
+        threads={state.threads}
+        activeThreadId={state.activeThreadId}
+        isCollapsed={state.isSidebarCollapsed}
         onSelectThread={handleSelectThread}
         onNewChat={handleNewChat}
       />
@@ -190,18 +333,33 @@ export default function App() {
       <main className="chat-shell">
         <ChatHeader
           title={isEmptyState ? "Launch Sense" : activeThread.title}
-          onToggleSidebar={() => setIsSidebarCollapsed((current) => !current)}
+          backendStatus={state.backendStatus.status}
+          threadStatus={getThreadStatus(activeThread)}
+          onToggleSidebar={() => dispatch({ type: chatActionTypes.TOGGLE_SIDEBAR })}
         />
 
         <section className="chat-panel">
           {isEmptyState ? (
-            <WelcomePanel items={suggestedPrompts} onSelectPrompt={handleSendMessage} />
+            <WelcomePanel
+              items={suggestedPrompts}
+              onSelectPrompt={handleSendMessage}
+              backendStatus={state.backendStatus.status}
+            />
           ) : (
-            <MessageList messages={activeThread.messages} isReplying={isReplying} />
+            <MessageList
+              messages={activeThread.messages}
+              isBusy={activeThread.busy}
+              canStartGeneration={canStartGeneration(activeThread)}
+              onStartGeneration={() => startGeneration(activeThread.id)}
+            />
           )}
         </section>
 
-        <Composer onSend={handleSendMessage} disabled={isReplying} />
+        <Composer
+          onSend={handleSendMessage}
+          disabled={isComposerDisabled(activeThread)}
+          placeholder={getComposerPlaceholder(activeThread)}
+        />
       </main>
     </div>
   );

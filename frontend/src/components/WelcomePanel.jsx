@@ -1,12 +1,15 @@
-export function WelcomePanel({ items, onSelectPrompt }) {
+export function WelcomePanel({ items, onSelectPrompt, backendStatus }) {
+  const helperCopy =
+    backendStatus === "unavailable"
+      ? "The backend is currently unavailable. Once it is reachable again, start with a short description of your business and the new offer you want to launch."
+      : "Describe your business, current customers, and your new product or service idea. LaunchSense will gather the missing context in chat and build the launch package from there.";
+
   return (
     <div className="welcome-panel">
       <div className="welcome-panel__content">
-        <p className="welcome-panel__eyebrow">Frontend-only clone</p>
-        <h1>How can I help you today?</h1>
-        <p className="welcome-panel__copy">
-          This version mirrors the Vercel chatbot layout with local-only state and no backend wiring.
-        </p>
+        <p className="welcome-panel__eyebrow">Chat-first launch builder</p>
+        <h1>What are you launching next?</h1>
+        <p className="welcome-panel__copy">{helperCopy}</p>
 
         <div className="welcome-grid">
           {items.map((item) => (
