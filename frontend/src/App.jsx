@@ -5,6 +5,7 @@ import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { WelcomePanel } from "./components/WelcomePanel";
 import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage, validateIdea } from "./lib/api";
+import { loadState, saveState } from "./lib/persist";
 import {
   canStartGeneration,
   chatActionTypes,
@@ -40,6 +41,13 @@ const suggestedPrompts = [
 ];
 
 function createInitialState() {
+  const persisted = loadState();
+  if (persisted) {
+    return {
+      ...persisted,
+      backendStatus: { status: "checking" }
+    };
+  }
   return createInitialAppState({
     isSidebarCollapsed: typeof window !== "undefined" ? window.innerWidth < 860 : false
   });
@@ -79,6 +87,11 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  // Persist threads + sidebar state on every change
+  useEffect(() => {
+    saveState(state);
+  }, [state]);
 
   useEffect(
     () => () => {
