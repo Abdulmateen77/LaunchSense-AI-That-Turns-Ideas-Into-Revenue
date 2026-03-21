@@ -89,14 +89,14 @@ async def generate_stream(request: GenerateRequest):
         # ------------------------------------------------------------------
         # Step 1 — RAG + Offer
         # ------------------------------------------------------------------
-        rag = await get_principles(context, evidence=evidence)
+        principles = await get_principles(context, evidence=evidence)
 
         yield emit("status", {"step": 1, "label": "Building your offer..."})
 
         offer = await run_offer_agent(
             context,
             evidence,
-            rag.principles,
+            principles,
             model=models.offer if models else None,
         )
 
@@ -108,7 +108,7 @@ async def generate_stream(request: GenerateRequest):
             offer = await run_offer_agent(
                 context,
                 evidence,
-                rag.principles,
+                principles,
                 model=models.offer if models else None,
                 weak_point=weak_point,
             )
