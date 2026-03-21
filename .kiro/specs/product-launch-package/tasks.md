@@ -1,145 +1,114 @@
-# Implementation Plan: LaunchSense — Product Launch Package
+# Tasks: product-launch-package
 
-## Overview
+## Implementation Plan
 
-Implement the LaunchSense chat-native agentic application in TypeScript. The pipeline runs sequentially: context gathering → confirmation → Offer_Engine → Landing_Page_Generator → Channel_Selector → Asset_Generator → Launch Package delivery. All state lives in memory; the chat history is the only persistence.
+- [x] 1. Project scaffold
+  - [x] 1.1 Create `backend/` directory with folder structure: `agents/`, `api/`, `models/`, `services/`, `tests/`
+  - [x] 1.2 Create `requirements.txt` with: fastapi uvicorn anthropic openai httpx python-dotenv pydantic
+  - [x] 1.3 Create `.env.example` with all required keys: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `CIVIC_TOKEN`, `CIVIC_URL`, `RAG_SERVICE_URL`
+  - [x] 1.4 Create `main.py` with FastAPI app, CORS middleware (allow all origins), and router imports
+  - [x] 1.5 Create `__init__.py` in every package folder
+  - [x] 1.6 Verify: `uvicorn main:app --reload` starts without errors and `curl http://localhost:8000/docs` returns swagger UI
 
-## Tasks
+- [x] 2. Pydantic schemas
+  - [x] 2.1 Create `models/schemas.py` — write `Competitor`, `RedditQuote`, `MarketSignal` models
+  - [x] 2.2 Write `Evidence` model with `max_length` constraints on all list fields (`competitors` max 4, `reddit_quotes` max 3, `market_signals` max 4)
+  - [x] 2.3 Write `Offer` model with nested `icp` sub-model (`who`, `pain`, `trigger`, `evidence_source`) and all top-level fields (`headline`, `subheadline`, `outcome`, `price`, `price_anchor`, `guarantee`, `bonuses`, `urgency`, `cta`, `competitor_gap`, `sources_used`)
+  - [x] 2.4 Write `LandingPage` model with nested `hero`, `problem`, `solution`, `vs_section`, `pricing`, and `sources` sections
+  - [x] 2.5 Write `GrowthPack` model with nested `cold_email` (subject, body, evidence_line, evidence_url, ps), `linkedin_dm`, `hooks` (exactly 3), and `channel`
+  - [x] 2.6 Write `EvalResult` model with `passed: bool`, `score: float`, `critical_fails: list[str]`, `action: str`
+  - [x] 2.7 Write `EnrichedContext` model with fields: `idea`, `niche`, `target_customer`, `core_pain`, `existing_solutions`, `notes`
+  - [x] 2.8 Write `GenerateRequest` and `ModelChoices` models
+  - [x] 2.9 Verify: `python -c "from models.schemas import EnrichedContext, Evidence, Offer, LandingPage, GrowthPack, EvalResult; print('OK')"` passes
 
-- [ ] 1. Define TypeScript types and interfaces
-  - Create `src/types.ts` with all data model interfaces: `BusinessContext`, `Offer`, `LandingPageCopy`, `Channel`, `ChannelSelection`, `LaunchAssets`, `LaunchPackage`, `ConversationPhase`, `ConversationState`, `ConversationTurn`, `AgentResponse`
-  - Add error types: `OfferError`, `CopyError`, `AssetError`
-  - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1_
+- [x] 3. Model registry
+  - [x] 3.1 Create `models/model_registry.py` with `REGISTRY` dict containing all 6 models and their capabilities (`supports_web_search`, `supports_structured`, `supports_streaming`, `blocked_agents`)
+  - [x] 3.2 Create `DEFAULTS` dict mapping agent name to default model_id
+  - [x] 3.3 Write `resolve_model(agent: str, model_id: str | None) -> str` — returns model_id if valid and not blocked, falls back to `DEFAULTS[agent]` with a print warning
+  - [x] 3.4 Verify: `resolve_model("research", "deepseek-r1")` returns `"claude-sonnet-4-6"`
+  - [x] 3.5 Verify: `resolve_model("critique", "deepseek-r1")` returns `"deepseek-r1"`
 
-- [ ] 2. Implement Offer_Engine
-  - [ ] 2.1 Implement `deriveOffer(context: BusinessContext): Offer | OfferError` in `src/offerEngine.ts`
-    - Derive `targetSegment`, `painPoint`, `outcomeStatement`, `riskReduction`, and `finalOfferStatement` from confirmed context
-    - Return `OfferError` when a coherent offer cannot be derived
-    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+- [x] 4. Intake loop
+  - [x] 4.1 Create `IntakeSession` class in `api/intake.py` with `messages: list`, `complete: bool`, `context: EnrichedContext | None`
+  - [x] 4.2 Create in-memory session store: `INTAKE_SESSIONS: dict[str, IntakeSession] = {}`
+  - [x] 4.3 Write `INTAKE_SYSTEM` prompt constant (by hand): one question at a time, max 4 questions, detect when all 5 fields are known, signal completion with `CONTEXT_COMPLETE` + JSON
+  - [x] 4.4 Write `async send_message(session_id: str, message: str)` — appends to messages, calls Haiku, checks for `CONTEXT_COMPLETE`, parses `EnrichedContext` from response when complete
+  - [x] 4.5 Write `POST /intake/message` route handler in `api/intake.py` and register in `main.py`
+  - [x] 4.6 Write `tests/test_intake.py` standalone async test — POST 4-5 times, confirm `CONTEXT_COMPLETE` fires and all `EnrichedContext` fields are populated
 
-  - [ ]* 2.2 Write property test for Offer_Engine completeness
-    - **Property 3: Offer completeness**
-    - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
-    - Arbitrary confirmed `BusinessContext` → all five Offer fields non-empty
-    - Tag: `// Feature: product-launch-package, Property 3: Offer completeness`
+- [x] 5. Agent 0 — Research
+  - [x] 5.1 Create `agents/agent0_research.py` — write `RESEARCH_SYSTEM` prompt constant (by hand): explicit search sequence (competitors → fetch pricing pages → Reddit → fetch threads), no invented URLs rule, return format matching `Evidence` schema
+  - [x] 5.2 Write `async run_research_agent(context: EnrichedContext, model: str | None = None) -> Evidence` — passes both `web_search_20260209` and `web_fetch_20260209` tools, `max_tokens=8000`, extracts final text block after all tool calls, strips markdown fences, returns validated `Evidence`
+  - [x] 5.3 Write `tests/test_agent0.py` standalone async test
+  - [x] 5.4 Run the test manually and verify: competitor URLs are real and resolve, Reddit quotes are actual text (not summaries), upvote counts are present
+  - [x] 5.5 Iterate on `RESEARCH_SYSTEM` prompt until all acceptance criteria pass
+  - [x] 5.6 Test with 3 different ideas: estate agents, freelancers, SaaS founders
 
-- [ ] 3. Implement Landing_Page_Generator
-  - [ ] 3.1 Implement `generateCopy(offer: Offer): LandingPageCopy | CopyError` in `src/landingPageGenerator.ts`
-    - Produce headline (≤ 12 words), subheadline (≤ 25 words), problemStatement (≤ 100 words), solutionExplanation (≤ 150 words), cta (≤ 8 words)
-    - Return `CopyError` when a required section cannot be produced
-    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+- [x] 6. RAG client
+  - [x] 6.1 Create `services/rag_client.py` — write `async get_principles(context: EnrichedContext, categories: list[str]) -> list[dict]`
+  - [x] 6.2 Build query string from `context.idea + context.core_pain`, call `GET {RAG_SERVICE_URL}/rag/retrieve` with httpx, 5-second timeout, return `[]` on any exception with a print warning
+  - [x] 6.3 Test with RAG service running: verify principles are returned
+  - [x] 6.4 Test with RAG service killed: verify `[]` is returned and pipeline does not crash
 
-  - [ ]* 3.2 Write property test for landing page copy length constraints
-    - **Property 4: Landing page copy length constraints**
-    - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5**
-    - Arbitrary `Offer` → all five copy fields within their word/character limits simultaneously
-    - Tag: `// Feature: product-launch-package, Property 4: Landing page copy length constraints`
+- [x] 7. Prompt builder
+  - [x] 7.1 Create `services/prompt_builder.py` — write `build_offer_prompt(context: EnrichedContext, evidence: Evidence, principles: list[dict]) -> str`
+  - [x] 7.2 Format sections in order: context (idea, target, pain, existing), competitors with pricing and weakness, Reddit quotes with upvotes and URL, pricing range, RAG principles as compact bullets, instructions (price anchoring, evidence citation, guarantee), full `Offer` JSON schema as expected output format
+  - [x] 7.3 Print the prompt for "AI tool for estate agents" and verify: real competitor prices present, actual Reddit quotes present, RAG principles clearly separated
+  - [x] 7.4 Iterate until the prompt clearly separates all sections and makes the expected output obvious
 
-- [ ] 4. Implement Channel_Selector
-  - [ ] 4.1 Implement `selectChannel(context: BusinessContext): ChannelSelection` in `src/channelSelector.ts`
-    - Evaluate `cold_outreach`, `existing_customer_email`, `organic_social` and select one primary channel
-    - Rationale ≤ 50 words; set `isDefault: true` and default to `existing_customer_email` when context is insufficient
-    - _Requirements: 4.1, 4.2, 4.3_
+- [x] 8. Agent 1 — Offer
+  - [x] 8.1 Create `agents/agent1_offer.py` — write `OFFER_SYSTEM` prompt constant (by hand): Hormozi-style principles, anchor-to-evidence rules, strict JSON only
+  - [x] 8.2 Write `async run_offer_agent(context: EnrichedContext, evidence: Evidence, principles: list[dict], model: str | None = None, weak_point: str | None = None) -> Offer` — calls `build_offer_prompt`, parses and validates `Offer`, accepts optional `weak_point` hint for regeneration
+  - [x] 8.3 Write `tests/test_agent1.py` — run with real evidence from Agent 0 test, verify `icp.evidence_source` is populated, `price` is below `price_anchor`, `guarantee` is specific and ≥20 words
+  - [x] 8.4 Iterate on `OFFER_SYSTEM` and `build_offer_prompt` until offer quality meets acceptance criteria
 
-  - [ ]* 4.2 Write property test for channel selection validity and rationale length
-    - **Property 5: Channel selection validity and rationale length**
-    - **Validates: Requirements 4.1, 4.2**
-    - Arbitrary `BusinessContext` → `primary` is one of the three valid enum values, `rationale` ≤ 50 words
-    - Tag: `// Feature: product-launch-package, Property 5: Channel selection validity and rationale length`
+- [x] 9. Agents 2 and 3 — Builder and Growth
+  - [x] 9.1 Create `agents/agent2_builder.py` — write `BUILDER_SYSTEM` prompt constant and `async run_builder_agent(offer: Offer, evidence: Evidence, model: str | None = None) -> LandingPage`; system prompt must require evidence stats, real source citations, and clean slug
+  - [x] 9.2 Create `agents/agent3_growth.py` — write `GROWTH_SYSTEM` prompt constant and `async run_growth_agent(offer: Offer, evidence: Evidence, model: str | None = None) -> GrowthPack`; system prompt must enforce email subject ≤8 words, body 3 paragraphs, LinkedIn DM no pitch
+  - [x] 9.3 Test both agents individually with real offer + evidence
+  - [x] 9.4 Test parallel execution with `asyncio.gather()` — confirm both complete before either result is used
+  - [x] 9.5 Verify `LandingPage.sources` contains real URLs from evidence and `GrowthPack.cold_email.evidence_url` is a real source URL
 
-- [ ] 5. Implement Asset_Generator
-  - [ ] 5.1 Implement `generateAssets(offer: Offer, channel: ChannelSelection): LaunchAssets | AssetError` in `src/assetGenerator.ts`
-    - Produce email (≤ 200 words) and LinkedIn message (≤ 300 characters) referencing `finalOfferStatement`
-    - Return `AssetError` when a required asset cannot be produced
-    - _Requirements: 5.1, 5.2, 5.3, 5.4_
+- [x] 10. Agent 4 — Critique
+  - [x] 10.1 Create `agents/agent4_critique.py` — write `CRITIQUE_SYSTEM` prompt constant (by hand): embed bad/good feedback examples, structure (strengths → weakest claims → single highest-leverage rewrite), must end with "The one change that will most improve conversions:"
+  - [x] 10.2 Write `run_critique_agent()` as an async generator that yields `str` chunks using `client.messages.stream()`
+  - [x] 10.3 Write `tests/test_agent4.py` — print each chunk as it arrives, verify chunks are incremental (not one large response)
+  - [x] 10.4 Verify critique includes at least one specific field name from the offer and final line starts with the required phrase
 
-  - [ ]* 5.2 Write property test for asset length constraints
-    - **Property 6: Asset length constraints**
-    - **Validates: Requirements 5.1, 5.2**
-    - Arbitrary `Offer` + `ChannelSelection` → email ≤ 200 words, linkedInMessage ≤ 300 characters
-    - Tag: `// Feature: product-launch-package, Property 6: Asset length constraints`
+- [x] 11. Eval service
+  - [x] 11.1 Create `services/evals.py` — write `eval_research(evidence: Evidence) -> EvalResult` as a pure function
+  - [x] 11.2 Critical checks in `eval_research`: competitors not empty, all competitor URLs start with `http`, all `reddit_quote.thread_url` values start with `http`, at least 1 reddit quote exists
+  - [x] 11.3 Write `async eval_offer(offer: Offer, evidence: Evidence) -> EvalResult` — uses Claude Haiku as judge, scores `pain_grounded`, `price_grounded`, `guarantee_credible`, returns `EvalResult` with `action`
+  - [x] 11.4 Verify: `eval_research(Evidence(competitors=[], ...))` returns `action="retry"`
+  - [x] 11.5 Verify: `eval_offer` runs in under 3 seconds using Haiku
 
-  - [ ]* 5.3 Write property test for assets referencing the final offer statement
-    - **Property 7: Assets reference the final offer statement**
-    - **Validates: Requirements 5.3**
-    - Arbitrary `Offer` + `ChannelSelection` → both email and LinkedIn message contain key terms from `finalOfferStatement`
-    - Tag: `// Feature: product-launch-package, Property 7: Assets reference the final offer statement`
+- [x] 12. SSE orchestration route
+  - [x] 12.1 Create `api/generate.py` — write `emit(event_name: str, payload: dict)` sync helper that formats SSE events as `f"data: {json.dumps({'event': event_name, 'data': payload})}\n\n"`
+  - [x] 12.2 Write `async def generate_stream(request: GenerateRequest)` generator function — runs all agents in correct order with evals, emits events at each stage, catches all exceptions and emits `error` event
+  - [x] 12.3 Wire agent execution order: status → Agent 0 → eval_research (retry if needed) → emit research → RAG → status → Agent 1 → eval_offer (regenerate if needed) → emit offer → status → asyncio.gather(Agent 2, Agent 3) → cache → emit page + growth → status → stream Agent 4 chunks → emit complete
+  - [x] 12.4 Add slug generation from idea string (lowercase, hyphenated, max 4 words)
+  - [x] 12.5 Add `cache_offer(slug, data)` using Vercel KV REST API via httpx after agents 2+3 complete
+  - [x] 12.6 Write `POST /generate` route returning `StreamingResponse` with `media_type="text/event-stream"` and register in `main.py`
+  - [x] 12.7 End-to-end test: `curl -N -X POST http://localhost:8000/generate -d '{"idea":"AI tool for estate agents"}' -H "Content-Type: application/json"` — verify all 8 event types fire in correct order and stream closes cleanly
+  - [x] 12.8 Test error handling: break Agent 2, verify `error` event fires instead of unhandled exception
 
-- [ ] 6. Checkpoint — Ensure all pipeline unit tests pass
-  - Ensure all tests pass, ask the user if questions arise.
+- [ ] 13. Integration with Nathan
+  - [ ] 13.1 Confirm Nathan can receive SSE stream from `POST /generate`
+  - [ ] 13.2 Verify Nathan's frontend renders research panel from `research` event
+  - [ ] 13.3 Verify Nathan's frontend renders offer card from `offer` event
+  - [ ] 13.4 Verify Nathan's frontend shows streaming text from `critique_chunk` events
+  - [ ] 13.5 Fix any CORS or event name mismatches
 
-- [ ] 7. Implement Launch Package renderer
-  - [ ] 7.1 Implement `renderLaunchPackage(pkg: LaunchPackage): string` in `src/renderer.ts`
-    - Render a single Markdown-formatted chat message with sections in fixed order: (1) Offer, (2) Landing Page, (3) Launch Assets, each with a clear heading
-    - Replace failed sections with `[Section could not be generated: <reason>]`
-    - _Requirements: 6.1, 6.2, 6.4_
+- [ ] 14. Integration with Mateen
+  - [ ] 14.1 Confirm Mateen's RAG service is running on `:8001`
+  - [ ] 14.2 Test: `curl "http://localhost:8001/rag/retrieve?query=AI+tool+estate+agents&categories=ICP,guarantee"` returns principles
+  - [ ] 14.3 Verify principles appear in `build_offer_prompt()` output
+  - [ ] 14.4 Verify offer quality visibly differs with RAG vs. without RAG
 
-  - [ ]* 7.2 Write property test for Launch Package section ordering and labelling
-    - **Property 8: Launch Package section ordering and labelling**
-    - **Validates: Requirements 6.1, 6.2**
-    - Arbitrary `LaunchPackage` → rendered message contains all three section headings in correct order (Offer before Landing Page, Landing Page before Launch Assets)
-    - Tag: `// Feature: product-launch-package, Property 8: Launch Package section ordering and labelling`
-
-- [ ] 8. Implement Agent orchestrator
-  - [ ] 8.1 Implement conversation phase management and context extraction in `src/agent.ts`
-    - Manage `ConversationPhase` transitions: `gathering_context` → `confirming_context` → `generating` → `delivered` → `refining`
-    - Extract `businessType`, `customerBase`, `newIdea` from free-text turns; track which fields are present
-    - After two consecutive failed attempts to gather a missing element, post explanation and invite restart
-    - _Requirements: 1.1, 1.2, 1.4_
-
-  - [ ]* 8.2 Write property test for follow-up targeting only missing context fields
-    - **Property 1: Follow-up targets only missing context fields**
-    - **Validates: Requirements 1.4**
-    - Arbitrary partial `BusinessContext` (any combination of missing fields) → agent follow-up asks about exactly the missing fields and does not re-ask for fields already provided
-    - Tag: `// Feature: product-launch-package, Property 1: Follow-up targets only missing context fields`
-
-  - [ ] 8.3 Implement confirmation flow and pipeline sequencing in `src/agent.ts`
-    - When all three context fields are present, post a summary confirmation message and await user confirmation
-    - After confirmation, invoke pipeline in order: `deriveOffer` → `generateCopy` → `selectChannel` → `generateAssets`
-    - Handle each step's error type per the error handling spec; halt pipeline on `OfferError`, continue with partial package for downstream failures
-    - Post completed `LaunchPackage` via `renderLaunchPackage`, then invite refinements
-    - _Requirements: 1.3, 1.5, 2.6, 3.6, 5.4, 6.1, 6.2, 6.3, 6.4_
-
-  - [ ]* 8.4 Write property test for generation not beginning before context is confirmed
-    - **Property 2: Generation does not begin before context is confirmed**
-    - **Validates: Requirements 1.3, 1.5**
-    - Arbitrary conversation histories → no Offer, LandingPageCopy, ChannelSelection, or LaunchAssets content appears in agent output before a `confirming_context` phase turn has occurred
-    - Tag: `// Feature: product-launch-package, Property 2: Generation does not begin before context is confirmed`
-
-- [ ] 9. Write unit tests
-  - [ ] 9.1 Write example-based unit tests in `src/__tests__/agent.test.ts`
-    - First message triggers a prompt covering all three context elements (Requirement 1.1)
-    - Post-delivery message contains refinement invitation (Requirement 6.3)
-    - _Requirements: 1.1, 6.3_
-
-  - [ ] 9.2 Write error condition unit tests
-    - `OfferError` → agent posts clarification request and halts pipeline
-    - `CopyError` → agent names the missing section and continues pipeline
-    - `AssetError` → agent names the missing asset
-    - Partial package delivery uses `[Section could not be generated: <reason>]` placeholder
-    - _Requirements: 2.6, 3.6, 5.4, 6.4_
-
-  - [ ] 9.3 Write edge case unit tests
-    - `Channel_Selector` defaults to `existing_customer_email` when context is ambiguous (`isDefault: true`)
-    - Empty or whitespace `BusinessContext` fields are handled gracefully without crashing
-    - _Requirements: 4.3_
-
-  - [ ] 9.4 Write integration test for full pipeline
-    - Confirmed `BusinessContext` → rendered `LaunchPackage` message with all sections present and correctly ordered
-    - _Requirements: 1.3, 1.5, 6.1, 6.2_
-
-- [ ] 10. Configure fast-check and wire test suite
-  - Add `fc.configureGlobal({ numRuns: 100 })` at the top of the property test file
-  - Ensure all property tests and unit tests are discoverable by the test runner
-  - _Requirements: all_
-
-- [ ] 11. Final checkpoint — Ensure all tests pass
-  - Ensure all tests pass, ask the user if questions arise.
-
-## Notes
-
-- Tasks marked with `*` are optional and can be skipped for a faster MVP
-- Each task references specific requirements for traceability
-- Property tests use fast-check with 100 iterations each; each test is tagged with its property number
-- Unit tests cover examples, error conditions, edge cases, and full pipeline integration
-- All state is in-memory; no database or auth is needed
+- [ ] 15. Demo preparation
+  - [ ] 15.1 Pre-run "AI tool for UK estate agents" to warm the KV cache
+  - [ ] 15.2 Pre-run "Notion template for freelancers" as second demo idea
+  - [ ] 15.3 Verify both slugs are accessible via `/p/{slug}`
+  - [ ] 15.4 Confirm research agent found real competitor prices for both ideas
+  - [ ] 15.5 Run full pipeline once live in front of team and time it
+  - [ ] 15.6 Confirm total time < 90 seconds
