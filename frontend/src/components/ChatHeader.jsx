@@ -1,3 +1,5 @@
+import { UserButton } from "@civic/auth/react";
+
 function PanelIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -45,6 +47,10 @@ export function ChatHeader({ title, backendStatus, threadStatus, onToggleSidebar
         </div>
 
         {threadStatus?.detail ? <span className="chat-header__status">{threadStatus.detail}</span> : null}
+      </div>
+
+      <div className="chat-header__auth">
+        <UserButton />
       </div>
     </header>
   );

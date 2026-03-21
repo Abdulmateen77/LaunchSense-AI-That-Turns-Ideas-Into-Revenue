@@ -245,6 +245,12 @@ textarea {
   display: grid;
   gap: 0.28rem;
   min-width: 0;
+  flex: 1;
+}
+
+.chat-header__auth {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .chat-header__meta {
