@@ -1,7 +1,17 @@
 #!/bin/bash
-set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+cleanup() {
+  echo ""
+  echo "Stopping all services..."
+  kill "$RAG_PID" "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null
+  wait "$RAG_PID" "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null
+  echo "Done."
+  exit 0
+}
+
+trap cleanup INT TERM
 
 # --- RAG service ---
 RAG_DIR="$ROOT/backend/services/RAG_services"
@@ -16,9 +26,7 @@ if [ ! -f "$RAG_VENV" ]; then
 fi
 
 echo "Running RAG ingest (safe to re-run)..."
-cd "$RAG_APP_DIR"
-PYTHONPATH="$RAG_APP_DIR" "$RAG_VENV" ingest.py
-cd "$ROOT"
+PYTHONPATH="$RAG_APP_DIR" "$RAG_VENV" "$RAG_APP_DIR/ingest.py"
 
 echo "Starting RAG service on :8001..."
 PYTHONPATH="$RAG_APP_DIR" ANONYMIZED_TELEMETRY=False "$RAG_VENV" -m uvicorn main:app --port 8001 --app-dir "$RAG_APP_DIR" &
@@ -35,16 +43,27 @@ if [ ! -f "$BACKEND_VENV" ]; then
 fi
 
 echo "Starting backend on :8000..."
-cd "$BACKEND_DIR"
-"$BACKEND_VENV" -m uvicorn main:app --reload --port 8000 &
+"$BACKEND_VENV" -m uvicorn main:app --reload --port 8000 --app-dir "$BACKEND_DIR" &
 BACKEND_PID=$!
 
-echo ""
-echo "Both services running:"
-echo "  Backend : http://localhost:8000"
-echo "  RAG     : http://localhost:8001"
-echo ""
-echo "Press Ctrl+C to stop both."
+# --- Frontend ---
+FRONTEND_DIR="$ROOT/frontend"
 
-trap "echo 'Stopping...'; kill $RAG_PID $BACKEND_PID 2>/dev/null" INT TERM
+if [ ! -d "$FRONTEND_DIR/node_modules" ]; then
+  echo "Installing frontend dependencies..."
+  npm install --prefix "$FRONTEND_DIR"
+fi
+
+echo "Starting frontend on :5173..."
+VITE_API_BASE_URL=http://localhost:8000 npm run dev --prefix "$FRONTEND_DIR" &
+FRONTEND_PID=$!
+
+echo ""
+echo "All services running:"
+echo "  Frontend : http://localhost:5173"
+echo "  Backend  : http://localhost:8000"
+echo "  RAG      : http://localhost:8001"
+echo ""
+echo "Press Ctrl+C to stop everything."
+
 wait

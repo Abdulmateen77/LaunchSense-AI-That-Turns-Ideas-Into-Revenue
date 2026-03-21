@@ -170,8 +170,8 @@ class EnrichedContext(BaseModel):
     target_customer: str = Field(min_length=1)
     core_pain: str = Field(min_length=1)
     existing_solutions: str = Field(min_length=1)
-    desired_outcome: str = ""
-    notes: str = ""
+    desired_outcome: str = Field(default="")
+    notes: str = Field(default="")
 
 
 # --- GenerateRequest and ModelChoices ---

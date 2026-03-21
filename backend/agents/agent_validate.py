@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 
@@ -68,6 +69,17 @@ def parse_llm_json(text: str) -> dict:
     return json.loads(clean.strip())
 
 
+def _call_validate(prompt: str) -> dict:
+    """Sync LLM call — run via asyncio.to_thread to avoid blocking the event loop."""
+    response = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=1500,
+        system=VALIDATE_SYSTEM,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return parse_llm_json(response.content[0].text)
+
+
 async def run_validate_agent(context: dict) -> dict:
     """
     Validates a startup idea cognitively.
@@ -84,14 +96,7 @@ EXISTING SOLUTIONS: {context.get('existing_solutions', '')}
 Think carefully. Be honest. Return JSON only."""
 
     try:
-        response = client.messages.create(
-            model="claude-haiku-4-5",
-            max_tokens=1500,
-            system=VALIDATE_SYSTEM,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text
-        return parse_llm_json(text)
+        return await asyncio.to_thread(_call_validate, prompt)
     except json.JSONDecodeError as e:
         print(f"Validate agent JSON parse failed: {e}")
         return {
