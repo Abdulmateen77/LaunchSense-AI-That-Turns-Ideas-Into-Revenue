@@ -92,7 +92,7 @@ class SolutionBenefit(BaseModel):
 
 class LandingPageSolution(BaseModel):
     headline: str = Field(min_length=1)
-    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=3)
+    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=4)
 
 
 class VsSection(BaseModel):

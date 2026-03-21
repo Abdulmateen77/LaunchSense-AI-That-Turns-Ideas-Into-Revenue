@@ -99,12 +99,14 @@ async def run_builder_agent(
       { "pain": "string", "stat": "string — real stat from evidence", "source": "string — real URL from evidence" }
     ]
   },
+  "IMPORTANT: points array must have EXACTLY 3 items — no more, no less",
   "solution": {
     "headline": "string",
     "benefits": [
       { "title": "string", "body": "string" }
     ]
   },
+  "IMPORTANT: benefits array must have EXACTLY 3 items — no more, no less",
   "vs_section": {
     "headline": "string",
     "us": ["string"],
@@ -157,6 +159,16 @@ Return ONLY valid JSON matching this schema:
         )
         text = response.content[0].text
         parsed = parse_llm_json(text)
+
+        # Truncate lists to schema limits before Pydantic validation
+        if "problem" in parsed and "points" in parsed["problem"]:
+            parsed["problem"]["points"] = parsed["problem"]["points"][:3]
+        if "solution" in parsed and "benefits" in parsed["solution"]:
+            parsed["solution"]["benefits"] = parsed["solution"]["benefits"][:4]
+        if "vs_section" in parsed:
+            parsed["vs_section"]["us"] = parsed["vs_section"].get("us", [])[:6]
+            parsed["vs_section"]["them"] = parsed["vs_section"].get("them", [])[:6]
+
         return LandingPage(**parsed)
 
     except json.JSONDecodeError as e:
