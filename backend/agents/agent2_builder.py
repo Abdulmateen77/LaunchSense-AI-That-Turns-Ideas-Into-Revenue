@@ -62,7 +62,11 @@ def parse_llm_json(text: str) -> dict:
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
-    return json.loads(clean.strip())
+    clean = clean.strip()
+    # Extract just the first complete JSON object to handle trailing content
+    decoder = json.JSONDecoder()
+    obj, _ = decoder.raw_decode(clean)
+    return obj
 
 
 async def run_builder_agent(
@@ -91,26 +95,28 @@ async def run_builder_agent(
     "headline": "string — must match offer headline",
     "subheadline": "string",
     "cta": "string — must match offer CTA",
-    "cta_sub": "string — e.g. 'No credit card · 60-second setup'"
+    "cta_sub": "string — e.g. No credit card 60-second setup"
   },
   "problem": {
     "headline": "string",
     "points": [
+      { "pain": "string", "stat": "string — real stat from evidence", "source": "string — real URL from evidence" },
+      { "pain": "string", "stat": "string — real stat from evidence", "source": "string — real URL from evidence" },
       { "pain": "string", "stat": "string — real stat from evidence", "source": "string — real URL from evidence" }
     ]
   },
-  "IMPORTANT: points array must have EXACTLY 3 items — no more, no less",
   "solution": {
     "headline": "string",
     "benefits": [
+      { "title": "string", "body": "string" },
+      { "title": "string", "body": "string" },
       { "title": "string", "body": "string" }
     ]
   },
-  "IMPORTANT: benefits array must have EXACTLY 3 items — no more, no less",
   "vs_section": {
     "headline": "string",
-    "us": ["string"],
-    "them": ["string"]
+    "us": ["string", "string", "string"],
+    "them": ["string", "string", "string"]
   },
   "pricing": {
     "price": "string",
