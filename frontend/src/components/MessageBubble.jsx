@@ -26,7 +26,7 @@ function LinkRow({ label, href }) {
   );
 }
 
-function renderContextCard(message, canStartGeneration, onStartGeneration) {
+function renderContextCard(message) {
   const context = message.data?.context;
 
   if (!context) {
@@ -35,17 +35,13 @@ function renderContextCard(message, canStartGeneration, onStartGeneration) {
 
   return (
     <div className="structured-card">
-      <p className="message-card__eyebrow">Context Ready</p>
+      <p className="message-card__eyebrow">Context captured — analysing your idea...</p>
       <DataRow label="Idea" value={context.idea} multiline />
       <DataRow label="Niche" value={context.niche} multiline />
       <DataRow label="Target customer" value={context.target_customer} multiline />
       <DataRow label="Core pain" value={context.core_pain} multiline />
       <DataRow label="Existing solutions" value={context.existing_solutions} multiline />
       <DataRow label="Notes" value={context.notes} multiline />
-
-      <button type="button" className="message-action" disabled={!canStartGeneration} onClick={onStartGeneration}>
-        {canStartGeneration ? "Generate launch package" : "Launch package running"}
-      </button>
     </div>
   );
 }
@@ -246,7 +242,7 @@ function renderAssetsCard(message) {
 function renderMessageContent(message, canStartGeneration, onStartGeneration) {
   switch (message.kind) {
     case "context":
-      return renderContextCard(message, canStartGeneration, onStartGeneration);
+      return renderContextCard(message);
     case "research":
       return renderResearchCard(message);
     case "offer":

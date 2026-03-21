@@ -138,16 +138,6 @@ export default function App() {
       return false;
     }
 
-    if (activeThread.phase === THREAD_MODES.CONTEXT_READY) {
-      dispatch({
-        type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
-        threadId: activeThread.id,
-        message: trimmed,
-        requestKind: "context"
-      });
-      return true;
-    }
-
     if (activeThread.phase === THREAD_MODES.COMPLETE) {
       dispatch({
         type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
