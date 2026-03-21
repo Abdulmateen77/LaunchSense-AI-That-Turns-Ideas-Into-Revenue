@@ -76,7 +76,7 @@ export function ValidationCard({ data, onConfirm, onSelectAlternative, disabled 
           disabled={disabled}
           onClick={onConfirm}
         >
-          Looks good — generate my launch package
+          Continue to asset selection
         </button>
       </div>
     </div>

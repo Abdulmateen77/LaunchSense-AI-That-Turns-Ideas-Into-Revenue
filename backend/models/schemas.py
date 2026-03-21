@@ -187,3 +187,4 @@ class GenerateRequest(BaseModel):
     idea: str = Field(min_length=1)
     context: EnrichedContext | None = None
     models: ModelChoices | None = None
+    assets: list[str] | None = None  # ["landing_page", "cold_email", "linkedin_dm", "hooks", "instagram_posts"]

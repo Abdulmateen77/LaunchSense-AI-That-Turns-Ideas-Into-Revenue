@@ -116,14 +116,32 @@ async def generate_stream(request: GenerateRequest):
         yield emit("offer", offer.model_dump())
 
         # ------------------------------------------------------------------
-        # Step 2 — Builder + Growth (parallel)
+        # Step 2 — Builder + Growth (conditional based on asset selection)
         # ------------------------------------------------------------------
-        yield emit("status", {"step": 2, "label": "Building page + outreach..."})
+        selected_assets = set(request.assets or ["landing_page", "cold_email", "linkedin_dm", "hooks"])
+        
+        yield emit("status", {"step": 2, "label": "Building selected assets..."})
 
-        landing_page, growth_pack = await asyncio.gather(
-            run_builder_agent(offer, evidence, model=models.builder if models else None),
-            run_growth_agent(offer, evidence, model=models.growth if models else None),
-        )
+        landing_page = None
+        growth_pack = None
+
+        tasks = []
+        if "landing_page" in selected_assets:
+            tasks.append(run_builder_agent(offer, evidence, model=models.builder if models else None))
+        else:
+            tasks.append(asyncio.sleep(0))  # placeholder
+
+        if any(asset in selected_assets for asset in ["cold_email", "linkedin_dm", "hooks"]):
+            tasks.append(run_growth_agent(offer, evidence, model=models.growth if models else None))
+        else:
+            tasks.append(asyncio.sleep(0))  # placeholder
+
+        results = await asyncio.gather(*tasks)
+        
+        if "landing_page" in selected_assets:
+            landing_page = results[0]
+        if any(asset in selected_assets for asset in ["cold_email", "linkedin_dm", "hooks"]):
+            growth_pack = results[1]
 
         slug = slug_from_idea(request.idea)
 
@@ -132,12 +150,14 @@ async def generate_stream(request: GenerateRequest):
             "context": context.model_dump(),
             "evidence": evidence.model_dump(),
             "offer": offer.model_dump(),
-            "landing_page": landing_page.model_dump(),
-            "growth_pack": growth_pack.model_dump(),
+            "landing_page": landing_page.model_dump() if landing_page else None,
+            "growth_pack": growth_pack.model_dump() if growth_pack else None,
         })
 
-        yield emit("page", {"url": f"/p/{slug}", "slug": slug})
-        yield emit("growth", growth_pack.model_dump())
+        if landing_page:
+            yield emit("page", {"url": f"/p/{slug}", "slug": slug})
+        if growth_pack:
+            yield emit("growth", growth_pack.model_dump())
 
         # ------------------------------------------------------------------
         # Step 3 — Critique (streaming)
