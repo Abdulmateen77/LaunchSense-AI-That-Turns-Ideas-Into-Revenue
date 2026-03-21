@@ -2,6 +2,8 @@ export const THREAD_MODES = Object.freeze({
   WELCOME: "welcome",
   INTAKE: "intake",
   CONTEXT_READY: "context_ready",
+  VALIDATING: "validating",
+  VALIDATION_READY: "validation_ready",
   GENERATING: "generating",
   COMPLETE: "complete",
   ERROR: "error"

@@ -4,7 +4,7 @@ import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { WelcomePanel } from "./components/WelcomePanel";
-import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage } from "./lib/api";
+import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage, validateIdea } from "./lib/api";
 import {
   canStartGeneration,
   chatActionTypes,
@@ -199,6 +199,11 @@ export default function App() {
         threadId,
         response
       });
+
+      // Auto-validate once intake is complete
+      if (response.complete && response.context) {
+        await runValidation(threadId, response.context);
+      }
     } catch (error) {
       const errorMessage = formatError(error);
 
@@ -217,6 +222,47 @@ export default function App() {
     }
 
     return true;
+  }
+
+  async function runValidation(threadId, context) {
+    dispatch({ type: chatActionTypes.VALIDATION_STARTED, threadId });
+    try {
+      const validation = await validateIdea(context);
+      dispatch({ type: chatActionTypes.VALIDATION_RECEIVED, threadId, validation });
+    } catch (error) {
+      const errorMessage = formatError(error);
+      dispatch({ type: chatActionTypes.THREAD_ERROR_RECORDED, threadId, errorMessage });
+    }
+  }
+
+  function handleConfirmValidation() {
+    startGeneration(activeThread?.id);
+  }
+
+  async function handleSelectAlternative(alt) {
+    const threadId = activeThread?.id;
+    if (!threadId || !activeThread?.context) return;
+
+    // Patch the context idea with the chosen alternative and re-validate
+    const updatedContext = {
+      ...activeThread.context,
+      idea: alt.title,
+      core_pain: alt.description,
+      notes: `Alternative angle: ${alt.why_stronger}`
+    };
+
+    dispatch({
+      type: chatActionTypes.INTAKE_RESPONSE_RECEIVED,
+      threadId,
+      response: {
+        session_id: activeThread.sessionId || threadId,
+        reply: `Switching to: "${alt.title}" — ${alt.description}`,
+        complete: true,
+        context: updatedContext
+      }
+    });
+
+    await runValidation(threadId, updatedContext);
   }
 
   async function startGeneration(threadId = activeThread?.id) {
@@ -351,6 +397,8 @@ export default function App() {
               isBusy={activeThread.busy}
               canStartGeneration={canStartGeneration(activeThread)}
               onStartGeneration={() => startGeneration(activeThread.id)}
+              onConfirmValidation={handleConfirmValidation}
+              onSelectAlternative={handleSelectAlternative}
             />
           )}
         </section>
