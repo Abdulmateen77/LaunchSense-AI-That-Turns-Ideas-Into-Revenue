@@ -290,6 +290,13 @@ function renderAssetsCard(message) {
         </section>
       ) : null}
 
+      {growth?.luffa_dm ? (
+        <section className="structured-section">
+          <h3>Luffa DM</h3>
+          <p className="message-card__pre">{growth.luffa_dm}</p>
+        </section>
+      ) : null}
+
       {Array.isArray(growth?.hooks) && growth.hooks.length ? (
         <section className="structured-section">
           <h3>Hooks</h3>

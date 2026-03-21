@@ -41,7 +41,14 @@ Your job is to generate cold outreach assets grounded in real market evidence.
    - Do not mention your product or service directly
    - Open a conversation, not a sale
 
-4. HOOKS
+4. LUFFA DM
+   - Must be under 120 words
+   - Luffa is a Web3-native encrypted messaging platform — assume the recipient is crypto/Web3 aware
+   - Lead with a specific insight or stat relevant to their world
+   - No pitch — open a thread, not a sale
+   - Tone: peer-to-peer, direct, no corporate language
+
+5. HOOKS
    - Generate exactly 3 hooks for different platforms
    - Platforms: LinkedIn, Twitter/X, cold email subject line
    - Each hook must have: platform, hook text, angle, evidence_basis
@@ -97,6 +104,7 @@ async def run_growth_agent(
     "ps": "string — the real pitch goes here"
   },
   "linkedin_dm": "string — under 150 words, no pitch, curiosity only",
+  "luffa_dm": "string — under 120 words, Web3-native tone, peer-to-peer, no pitch",
   "hooks": [
     {
       "platform": "LinkedIn|Twitter/X|cold email subject line",
@@ -135,6 +143,7 @@ Generate cold outreach assets. Rules:
 - Email subject: under 8 words
 - Email body: exactly 3 paragraphs, end with one question
 - LinkedIn DM: under 150 words, no pitch, curiosity only
+- Luffa DM: under 120 words, Web3-native peer-to-peer tone, no pitch, open a thread
 - Exactly 3 hooks for: LinkedIn, Twitter/X, cold email subject line
 - evidence_line and evidence_url must come from the evidence above
 
