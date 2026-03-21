@@ -7,17 +7,17 @@ from pydantic import BaseModel, Field
 
 class Competitor(BaseModel):
     name: str = Field(min_length=1)
-    url: str = Field(min_length=1)
-    pricing_found: str = Field(min_length=1)  # "£49/mo" or "pricing not public"
-    pricing_url: str = Field(min_length=1)
-    weakness: str = Field(min_length=1)
+    url: str = Field(default="")
+    pricing_found: str = Field(default="pricing not public")
+    pricing_url: str = Field(default="")
+    weakness: str = Field(default="")
 
 
 class RedditQuote(BaseModel):
     quote: str = Field(min_length=1)
-    subreddit: str = Field(min_length=1)
-    upvotes: str = Field(min_length=1)
-    thread_url: str = Field(min_length=1)
+    subreddit: str = Field(default="unknown")
+    upvotes: str = Field(default="unknown")
+    thread_url: str = Field(default="")
 
 
 class MarketSignal(BaseModel):
@@ -26,9 +26,9 @@ class MarketSignal(BaseModel):
 
 
 class PricingRange(BaseModel):
-    low: str = Field(min_length=1)
-    high: str = Field(min_length=1)
-    insight: str = Field(min_length=1)
+    low: str = Field(default="unknown")
+    high: str = Field(default="unknown")
+    insight: str = Field(default="unknown")
 
 
 # --- Evidence ---
@@ -37,7 +37,7 @@ class Evidence(BaseModel):
     competitors: list[Competitor] = Field(default_factory=list, max_length=4)
     reddit_quotes: list[RedditQuote] = Field(default_factory=list, max_length=3)
     market_signals: list[MarketSignal] = Field(default_factory=list, max_length=4)
-    pricing_range: PricingRange
+    pricing_range: PricingRange = Field(default_factory=PricingRange)
     all_sources: list[str] = Field(default_factory=list, max_length=20)
 
 
@@ -92,7 +92,7 @@ class SolutionBenefit(BaseModel):
 
 class LandingPageSolution(BaseModel):
     headline: str = Field(min_length=1)
-    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=3)
+    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=4)
 
 
 class VsSection(BaseModel):

@@ -3,6 +3,7 @@ import os
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
+from tavily import TavilyClient
 
 load_dotenv()
 
@@ -10,81 +11,28 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 if not ANTHROPIC_API_KEY:
     raise ValueError("ANTHROPIC_API_KEY not set in .env")
 
-client = Anthropic()
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+if not TAVILY_API_KEY:
+    raise ValueError("TAVILY_API_KEY not set in .env")
+
+anthropic_client = Anthropic()
+tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 
 from models.schemas import EnrichedContext, Evidence
+from models.model_registry import resolve_model
 
-RESEARCH_SYSTEM = """You are a market research agent. Your job is to gather REAL evidence about a product idea using web search and web fetch tools.
+RESEARCH_SYSTEM = """You are a market research analyst. You will be given raw search results.
+Extract structured evidence from them.
 
-Follow this EXACT research sequence:
+RULES:
+- Only use information that appears in the search results — never invent data
+- Quotes must be exact words from the results, not summaries
+- If pricing is not found, write "pricing not public"
+- You MUST populate pricing_range even if approximate
+- Return ONLY valid JSON with NO markdown fences
 
-STEP 1 — COMPETITOR SEARCH
-Search for: "{idea} software pricing"
-Then search for: "{idea} tool alternatives"
-Identify the top 2-3 competitors from the results.
-
-STEP 2 — FETCH COMPETITOR PRICING PAGES
-For each competitor found in Step 1, fetch their pricing page URL.
-Use ONLY URLs that appeared in your search results — NEVER invent URLs.
-If a pricing page is paywalled or JS-rendered and you cannot read the price, write "pricing not public" — do NOT guess.
-
-STEP 3 — REDDIT SEARCH
-Search for: "site:reddit.com {niche} {pain}"
-Then search for: "reddit {target_customer} {pain}"
-Find threads where real users discuss this pain point.
-
-STEP 4 — FETCH REDDIT THREADS
-For each Reddit thread URL found in Step 3, fetch the actual thread content.
-Use ONLY URLs that appeared in your search results.
-Extract EXACT quotes from users — word for word, not summaries.
-Record the upvote count from the fetched page.
-
-STEP 5 — MARKET SIGNALS
-Search for industry statistics, growth data, and market size for this niche.
-
-CRITICAL RULES:
-- NEVER invent URLs. Only use URLs that appeared in prior search results.
-- Reddit quotes must be EXACT words from the fetched thread, not paraphrases or summaries.
-- Upvote counts must come from the actual fetched page content.
-- If a page cannot be fetched, note the failure — do not fabricate content.
-- pricing_found must contain actual price strings (e.g. "$49/mo") OR "pricing not public".
-- pricing_url must be the actual URL you fetched, not a guessed URL.
-
-Return ONLY valid JSON matching this exact schema — no markdown fences, no commentary:
-
-{
-  "competitors": [
-    {
-      "name": "CompetitorName",
-      "url": "https://competitor.com",
-      "pricing_found": "$49/mo starter · $149/mo pro",
-      "pricing_url": "https://competitor.com/pricing",
-      "weakness": "Specific weakness based on what you found"
-    }
-  ],
-  "reddit_quotes": [
-    {
-      "quote": "Exact words from the Reddit post",
-      "subreddit": "subredditname",
-      "upvotes": "247",
-      "thread_url": "https://reddit.com/r/subreddit/comments/..."
-    }
-  ],
-  "market_signals": [
-    {
-      "signal": "Specific statistic or market data point",
-      "source": "https://source-url.com"
-    }
-  ],
-  "pricing_range": {
-    "low": "$29/mo",
-    "high": "$199/mo",
-    "insight": "What the pricing range tells us about the market"
-  },
-  "all_sources": [
-    "https://every-url-that-yielded-real-data.com"
-  ]
-}"""
+Return this exact JSON structure:
+{"competitors":[{"name":"","url":"","pricing_found":"","pricing_url":"","weakness":""}],"reddit_quotes":[{"quote":"","subreddit":"","upvotes":"","thread_url":""}],"market_signals":[{"signal":"","source":""}],"pricing_range":{"low":"","high":"","insight":""},"all_sources":[]}"""
 
 
 def parse_llm_json(text: str) -> dict:
@@ -97,42 +45,85 @@ def parse_llm_json(text: str) -> dict:
     return json.loads(clean.strip())
 
 
+def search_tavily(query: str, max_results: int = 5) -> str:
+    """Run a Tavily search and return formatted results as text."""
+    try:
+        response = tavily_client.search(
+            query=query,
+            max_results=max_results,
+            include_answer=True,
+        )
+        lines = []
+        if response.get("answer"):
+            lines.append(f"Summary: {response['answer']}\n")
+        for r in response.get("results", []):
+            lines.append(f"Title: {r.get('title', '')}")
+            lines.append(f"URL: {r.get('url', '')}")
+            lines.append(f"Content: {r.get('content', '')[:200]}")
+            lines.append("---")
+        return "\n".join(lines)
+    except Exception as e:
+        print(f"Tavily search failed for '{query}': {e}")
+        return ""
+
+
 async def run_research_agent(context: EnrichedContext, model: str | None = None) -> Evidence:
-    user_message = f"""Research this product idea thoroughly:
+    model_id = resolve_model("research", model)
+
+    # Run targeted searches via Tavily
+    competitor_results = search_tavily(
+        f"{context.idea} competitors pricing {context.niche}", max_results=3
+    )
+    pricing_results = search_tavily(
+        f"{context.idea} {context.niche} pricing per month cost subscription", max_results=3
+    )
+    reddit_results = search_tavily(
+        f"reddit {context.core_pain} {context.niche}", max_results=3
+    )
+    market_results = search_tavily(
+        f"{context.niche} market size statistics {context.idea}", max_results=2
+    )
+
+    user_message = f"""Extract structured market research from these search results.
 
 IDEA: {context.idea}
 NICHE: {context.niche}
-TARGET CUSTOMER: {context.target_customer}
-CORE PAIN: {context.core_pain}
-EXISTING SOLUTIONS: {context.existing_solutions}
+CUSTOMER: {context.target_customer}
+PAIN: {context.core_pain}
 
-Follow the research sequence in your instructions. Search for competitors, fetch their pricing pages, find Reddit threads about this pain, fetch the actual thread content, and gather market signals.
+--- COMPETITOR SEARCH RESULTS ---
+{competitor_results}
 
-Return ONLY valid JSON matching the Evidence schema."""
+--- PRICING SEARCH RESULTS ---
+{pricing_results}
+
+--- REDDIT SEARCH RESULTS ---
+{reddit_results}
+
+--- MARKET STATS SEARCH RESULTS ---
+{market_results}
+
+Extract:
+- 2 competitors with real pricing and URLs from the results above
+- 1-2 Reddit quotes (exact words) with upvote counts and thread URLs
+- 1-2 market signals with sources
+- Pricing range based on competitor data found
+
+Return ONLY valid JSON matching the schema. No markdown fences."""
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-5",
-            max_tokens=8000,
-            tools=[
-                {"type": "web_search_20260209", "name": "web_search"},
-                {"type": "web_fetch_20260209", "name": "web_fetch", "max_uses": 5},
-            ],
+        response = anthropic_client.messages.create(
+            model="claude-haiku-4-5",
+            max_tokens=2000,
             system=RESEARCH_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
         )
-
-        text = next(
-            (block.text for block in reversed(response.content) if hasattr(block, "text")),
-            "{}",
-        )
-
+        text = response.content[0].text
         parsed = parse_llm_json(text)
         return Evidence(**parsed)
 
     except json.JSONDecodeError as e:
         print(f"Agent 0 JSON parse failed: {e}")
-        print(f"Raw text: {text[:500]}")
         raise
     except Exception as e:
         print(f"Agent 0 failed: {e}")

@@ -89,9 +89,7 @@ async def generate_stream(request: GenerateRequest):
         # ------------------------------------------------------------------
         # Step 1 — RAG + Offer
         # ------------------------------------------------------------------
-        principles = await get_principles(
-            context, categories=["ICP", "guarantee", "pricing", "positioning"]
-        )
+        principles = await get_principles(context, evidence=evidence)
 
         yield emit("status", {"step": 1, "label": "Building your offer..."})
 

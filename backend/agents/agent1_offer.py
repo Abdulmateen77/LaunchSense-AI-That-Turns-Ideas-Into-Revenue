@@ -95,7 +95,7 @@ async def run_offer_agent(
 
     try:
         response = client.messages.create(
-            model="claude-haiku-4-5",
+            model=model_id,
             max_tokens=4000,
             system=OFFER_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
