@@ -218,6 +218,16 @@ export default function App() {
     } catch (error) {
       const errorMessage = formatError(error);
 
+      // Content policy violation — show inline, keep thread alive
+      if (errorMessage.includes("This platform is for business launch planning only")) {
+        dispatch({
+          type: chatActionTypes.INTAKE_SOFT_ERROR,
+          threadId,
+          errorMessage
+        });
+        return true;
+      }
+
       if (isConnectionFailure(errorMessage)) {
         dispatch({
           type: chatActionTypes.SET_BACKEND_STATUS,
