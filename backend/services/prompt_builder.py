@@ -1,3 +1,5 @@
+# backend/services/prompt_builder.py
+
 from models.schemas import EnrichedContext, Evidence
 
 
@@ -6,93 +8,116 @@ def build_offer_prompt(
     evidence: Evidence,
     principles: list[dict],
 ) -> str:
-    sections: list[str] = []
 
-    # Section 1 — Context
-    sections.append(
-        f"IDEA: {context.idea}\n"
-        f"NICHE: {context.niche}\n"
-        f"TARGET: {context.target_customer}\n"
-        f"PAIN: {context.core_pain}\n"
-        f"EXISTING: {context.existing_solutions}"
-    )
+    # Block 1 — from EnrichedContext Pydantic model (use .field not .get())
+    block1 = f"""## BLOCK 1 — Business context
 
-    # Section 2 — Competitors
-    competitor_lines = ["MARKET EVIDENCE:", "", "Competitors:"]
-    if evidence.competitors:
-        for c in evidence.competitors:
-            competitor_lines.append(
-                f"- {c.name}: {c.pricing_found} ({c.pricing_url}) — weakness: {c.weakness}"
-            )
-    else:
-        competitor_lines.append("Competitors: none found")
-    sections.append("\n".join(competitor_lines))
+Idea: {context.idea}
+Target customer (ICP): {context.target_customer}
+Niche: {context.niche}
+Core pain: {context.core_pain}
+Existing alternatives: {context.existing_solutions or 'Not specified'}"""
 
-    # Section 3 — Reddit quotes
-    quote_lines = ["Real customer quotes (exact words from Reddit):"]
-    if evidence.reddit_quotes:
-        for q in evidence.reddit_quotes:
-            quote_lines.append(
-                f'- "{q.quote}" ({q.upvotes} upvotes, r/{q.subreddit}) — {q.thread_url}'
-            )
-    else:
-        quote_lines.append("Real customer quotes: none found")
-    sections.append("\n".join(quote_lines))
+    # Block 2 — from Evidence Pydantic model
+    competitors_text = _format_competitors(evidence.competitors or [])
+    quotes_text = _format_quotes(evidence.reddit_quotes or [])
+    pricing = f"{evidence.pricing_range.low}–{evidence.pricing_range.high}" if evidence.pricing_range else "Unknown"
 
-    # Section 4 — Pricing range
-    pr = evidence.pricing_range
-    sections.append(
-        f"Pricing range: {pr.low} – {pr.high}\n"
-        f"Insight: {pr.insight}"
-    )
+    block2 = f"""## BLOCK 2 — Market evidence
 
-    # Section 5 — Market signals (only if non-empty)
-    if evidence.market_signals:
-        signal_lines = ["Market signals:"]
-        for s in evidence.market_signals:
-            signal_lines.append(f"- {s.signal} (source: {s.source})")
-        sections.append("\n".join(signal_lines))
+Competitors:
+{competitors_text}
 
-    # Section 6 — RAG principles (only if non-empty)
-    if principles:
-        principle_lines = ["OFFER PRINCIPLES (apply these, do not copy verbatim):"]
-        for p in principles:
-            principle_lines.append(f"- [{p.get('category', '')}] {p.get('text', '')}")
-        sections.append("\n".join(principle_lines))
+Pricing range: {pricing}
 
-    # Section 7 — Instructions
-    sections.append(
-        "INSTRUCTIONS:\n"
-        "- Price your offer BELOW the highest competitor price found above\n"
-        "- Reference at least one specific Reddit quote or competitor weakness in the ICP pain\n"
-        "- The guarantee must be something competitors do NOT offer — make it specific and measurable\n"
-        "- The CTA must be a specific action, not generic (\"Get Started\" is not acceptable)\n"
-        "- sources_used must contain real URLs from the evidence above\n"
-        "- Return ONLY valid JSON — no markdown fences, no commentary"
-    )
+Customer language (verbatim):
+{quotes_text}"""
 
-    # Section 8 — Output schema
-    sections.append(
-        'Return ONLY valid JSON matching this exact schema:\n'
-        '{\n'
-        '  "icp": {\n'
-        '    "who": "hyper-specific person description",\n'
-        '    "pain": "quantified pain (hours, £, specific frustration)",\n'
-        '    "trigger": "the moment they would buy",\n'
-        '    "evidence_source": "which Reddit quote or competitor gap backs this"\n'
-        '  },\n'
-        '  "headline": "[Outcome] for [Person] in [Timeframe]",\n'
-        '  "subheadline": "one sentence expanding on the headline",\n'
-        '  "outcome": "what the customer achieves",\n'
-        '  "price": "£XX/mo",\n'
-        '  "price_anchor": "Competitors charge up to £XXX/mo",\n'
-        '  "guarantee": "specific measurable guarantee",\n'
-        '  "bonuses": ["bonus 1", "bonus 2"],\n'
-        '  "urgency": "why act now",\n'
-        '  "cta": "specific action verb + outcome",\n'
-        '  "competitor_gap": "why you win vs them",\n'
-        '  "sources_used": ["https://url1", "https://url2"]\n'
-        '}'
-    )
+    # Block 3 — RAG principles converted to bullet precontext
+    block3 = _format_principles(principles)
 
-    return "\n\n".join(sections)
+    # Block 4 — output schema (unchanged from your existing OFFER_SYSTEM in agent1)
+    block4 = """## BLOCK 4 — Output schema
+
+Return a single valid JSON object. No markdown fences. No text before or after.
+
+{
+  "icp": "Specific buyer, their situation, why they have this problem now.",
+  "pain_points": ["Pain 1 — moment + cost", "Pain 2 — consequence", "Pain 3 — emotional impact"],
+  "offer": "Under 80 words. What, for whom, outcome, how fast. No buzzwords.",
+  "guarantee": "Outcome-based and time-bound. One sentence.",
+  "bonuses": ["Bonus 1 — name + objection it removes", "Bonus 2 — name + objection it removes"],
+  "urgency": "One sentence. Cost-of-inaction if no real scarcity.",
+  "headline": "Under 12 words. Use customer language.",
+  "subheadline": "Under 25 words. Names ICP + specific result.",
+  "price": "Specific amount e.g. £49/mo",
+  "price_anchor": "Reference actual competitor pricing from Block 2.",
+  "cta": "Specific action verb + outcome. Not 'Get Started'.",
+  "sources_used": ["real URLs from evidence only"]
+}"""
+
+    return f"""You are an expert offer engineer.
+
+---
+
+{block1}
+
+---
+
+{block2}
+
+---
+
+{block3}
+
+---
+
+{block4}
+""".strip()
+
+
+def _format_principles(principles: list[dict]) -> str:
+    if not principles:
+        return """## BLOCK 3 — Strategic principles
+
+- Narrow the ICP to a buyer with a specific, urgent problem.
+- Make the outcome measurable and time-bound.
+- Use a guarantee that shifts risk from buyer to seller.
+- Add bonuses that remove the top objection to buying.
+- Frame price against the cost of not solving the problem."""
+
+    lines = ["## BLOCK 3 — Strategic principles", ""]
+    for p in principles:
+        category = p.get("category", "general").upper()
+        principle = p.get("principle", "")
+        if principle:
+            lines.append(f"- [{category}] {principle}")
+    return "\n".join(lines)
+
+
+def _format_competitors(competitors: list) -> str:
+    if not competitors:
+        return "None identified"
+    lines = []
+    for c in competitors[:4]:
+        # handle both dict and Pydantic model
+        if hasattr(c, "name"):
+            name = c.name or "Unknown"
+            price = c.pricing_found or "unknown price"
+        else:
+            name = c.get("name", "Unknown")
+            price = c.get("pricing_found", "unknown price")
+        lines.append(f"- {name} ({price})")
+    return "\n".join(lines)
+
+
+def _format_quotes(quotes: list) -> str:
+    if not quotes:
+        return "No verbatim quotes collected"
+    lines = []
+    for q in quotes[:4]:
+        # handle both dict and Pydantic model
+        text = q.quote if hasattr(q, "quote") else q.get("quote", "")
+        if text:
+            lines.append(f'- "{text}"')
+    return "\n".join(lines) or "No verbatim quotes collected"

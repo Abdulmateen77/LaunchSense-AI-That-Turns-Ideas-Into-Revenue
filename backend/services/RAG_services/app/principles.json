@@ -1,0 +1,170 @@
+[
+  {
+    "id": "icp-001",
+    "category": "icp",
+    "title": "Narrow target market",
+    "text": "Offers convert better when aimed at a specific buyer with an urgent problem. Broad market targeting produces weak copy and weak conversion. The narrower the ICP, the more the offer feels like it was built exactly for them. A solo letting agent with slow lead response is a better ICP than 'estate agents'.",
+    "tags": ["icp", "targeting", "specificity"]
+  },
+  {
+    "id": "icp-002",
+    "category": "icp",
+    "title": "Painful problem over demographics",
+    "text": "Define ICP by the pain they experience, not just their job title or industry. A buyer in acute pain with no working solution is far more valuable than a buyer who fits the demographic but has already solved the problem. Pain-based ICP selection makes the offer immediately relevant.",
+    "tags": ["icp", "pain", "urgency"]
+  },
+  {
+    "id": "pain-001",
+    "category": "pain",
+    "title": "Agitate before solving",
+    "text": "The offer lands harder when the buyer recognises their pain before seeing the solution. Name the exact symptom — lost leads, slow response, missed revenue — before presenting what you do. The more specific the pain description, the more the buyer trusts you understand their situation.",
+    "tags": ["pain", "copy", "conversion"]
+  },
+  {
+    "id": "pain-002",
+    "category": "pain",
+    "title": "Urgency from cost of inaction",
+    "text": "Buyers delay when inaction feels safe. Make the cost of not solving explicit — in money, time, or competitive loss. A letting agent who loses three leads per week at £1,200 average commission is losing £187,000 per year. Quantified inaction cost creates urgency without manufactured scarcity.",
+    "tags": ["pain", "urgency", "pricing"]
+  },
+  {
+    "id": "outcome-001",
+    "category": "outcome",
+    "title": "Outcome over feature",
+    "text": "Buyers purchase outcomes, not features. 'Replies to leads in 30 seconds' is a feature. 'Never lose another letting enquiry to a faster agent' is an outcome. Frame the offer around the life or business state the buyer wants to reach, not the mechanism that gets them there.",
+    "tags": ["outcome", "copy", "positioning"]
+  },
+  {
+    "id": "outcome-002",
+    "category": "outcome",
+    "title": "Measurable outcome improves trust",
+    "text": "Specific, measurable outcomes are more believable and more valuable than vague promises. '30-second lead response' is more credible than 'faster lead follow-up'. Measurable outcomes also make guarantees easier to construct and justify.",
+    "tags": ["outcome", "proof", "guarantee"]
+  },
+  {
+    "id": "guarantee-001",
+    "category": "guarantee",
+    "title": "Risk reversal reduces hesitation",
+    "text": "A strong guarantee shifts risk from buyer to seller. This reduces the perceived cost of a wrong decision and lowers purchase hesitation. The best guarantees are outcome-based and time-bound — 'If you don't respond to every lead within 60 seconds in your first 30 days, we refund everything.'",
+    "tags": ["guarantee", "risk", "conversion"]
+  },
+  {
+    "id": "guarantee-002",
+    "category": "guarantee",
+    "title": "Unconditional beats conditional",
+    "text": "Unconditional guarantees outperform conditional ones because they signal confidence. Conditional guarantees with caveats create doubt. If you are confident in your product, the guarantee cost is low and the conversion uplift is high. Most buyers will not claim even a valid guarantee.",
+    "tags": ["guarantee", "trust", "conversion"]
+  },
+  {
+    "id": "bonus-001",
+    "category": "bonuses",
+    "title": "Bonuses remove objections",
+    "text": "The best bonuses do not add more features — they remove the reasons not to buy. Common objections are: too hard to set up, takes too long to see results, requires team training. A bonus like 'Done-for-you onboarding in 24 hours' removes the setup objection. Map each bonus to a specific objection.",
+    "tags": ["bonuses", "objections", "conversion"]
+  },
+  {
+    "id": "bonus-002",
+    "category": "bonuses",
+    "title": "Speed-to-value bonus",
+    "text": "Buyers want results fast. A bonus that accelerates time-to-value is highly effective — templates, pre-built configurations, fast onboarding calls. The faster the buyer sees their first result, the lower the churn and the higher the referral rate.",
+    "tags": ["bonuses", "onboarding", "retention"]
+  },
+  {
+    "id": "pricing-001",
+    "category": "pricing",
+    "title": "Price anchored to value, not cost",
+    "text": "Price should be compared to the value of the outcome, not to the cost of the product. If a letting agent loses one lead per week worth £1,200 commission, the tool is worth far more than its monthly subscription. Anchor price to what the problem costs, not what it costs to build the solution.",
+    "tags": ["pricing", "value", "anchoring"]
+  },
+  {
+    "id": "pricing-002",
+    "category": "pricing",
+    "title": "Higher price signals credibility",
+    "text": "Low prices create doubt about quality in B2B markets. A £29/month tool feels less reliable than a £149/month tool for a business-critical problem. Price your offer to match the gravity of the problem. Buyers spending on lead response expect to pay for something that works.",
+    "tags": ["pricing", "positioning", "b2b"]
+  },
+  {
+    "id": "pricing-003",
+    "category": "pricing",
+    "title": "ROI framing for B2B",
+    "text": "B2B buyers justify purchases with ROI, not emotion. Frame pricing in terms of payback period: 'One recovered lead per month pays for 12 months of the tool.' This reframes the price from a cost to an investment and makes the decision much easier for budget-conscious buyers.",
+    "tags": ["pricing", "roi", "b2b", "framing"]
+  },
+  {
+    "id": "urgency-001",
+    "category": "urgency",
+    "title": "Scarcity must be real",
+    "text": "Fake urgency destroys trust when buyers see through it. Use real scarcity — limited onboarding slots, cohort-based pricing, genuinely time-limited access. If your product has no real scarcity, use cost-of-inaction urgency instead: the buyer is losing money every day they delay.",
+    "tags": ["urgency", "scarcity", "trust"]
+  },
+  {
+    "id": "urgency-002",
+    "category": "urgency",
+    "title": "Deadline drives decision",
+    "text": "Buyers without a deadline rarely decide. Build a reason to act now into the offer — a price increase date, a bonus expiry, a cohort start date. The best urgency mechanisms are tied to a real event, not an arbitrary countdown timer.",
+    "tags": ["urgency", "deadline", "conversion"]
+  },
+  {
+    "id": "proof-001",
+    "category": "proof",
+    "title": "Specific proof beats generic claims",
+    "text": "Generic testimonials like 'great product' are worthless. Specific proof like 'We went from a 4-hour average lead response to 28 seconds, and our conversion rate went up 40%' is powerful. Collect and display proof that matches the exact claim you are making in the offer.",
+    "tags": ["proof", "testimonials", "credibility"]
+  },
+  {
+    "id": "proof-002",
+    "category": "proof",
+    "title": "Use customer language in copy",
+    "text": "The most persuasive copy uses the exact words customers use to describe their problem. Mine reviews, Reddit threads, support tickets, and sales calls for verbatim language. Buyers recognise their own words and feel immediately understood, which is the fastest trust builder in copy.",
+    "tags": ["proof", "copy", "voice-of-customer"]
+  },
+  {
+    "id": "positioning-001",
+    "category": "positioning",
+    "title": "Category design over category entry",
+    "text": "The best offers do not compete in an existing category — they name a new one. Instead of 'AI CRM for estate agents', position as 'the 30-second lead response system for letting agents'. This shifts comparison from price to relevance and puts you in a category of one.",
+    "tags": ["positioning", "category", "differentiation"]
+  },
+  {
+    "id": "positioning-002",
+    "category": "positioning",
+    "title": "Against the status quo, not competitors",
+    "text": "Position your offer against the buyer's current bad situation, not against a named competitor. 'Still following up leads manually?' beats 'Better than LeadPro'. Competing against the status quo is more scalable, avoids legal risk, and speaks directly to the buyer's daily pain.",
+    "tags": ["positioning", "copy", "competitors"]
+  },
+  {
+    "id": "value-equation-001",
+    "category": "value_equation",
+    "title": "Four drivers of perceived value",
+    "text": "Buyers weigh value on four dimensions: the desirability of the outcome, the likelihood it will work for them, how fast they will see results, and how much effort they must put in. A strong offer maximises all four: clear outcome, proven mechanism, fast results, and minimal buyer effort.",
+    "tags": ["value", "offer-design", "conversion"]
+  },
+  {
+    "id": "value-equation-002",
+    "category": "value_equation",
+    "title": "Effort reduction increases perceived value",
+    "text": "Buyers pay more when you do more of the work. A done-for-you solution commands a higher price than a tool they have to configure themselves. Reduce buyer effort at every step — onboarding, integration, learning curve — and emphasise this reduction in the offer.",
+    "tags": ["value", "effort", "done-for-you"]
+  },
+  {
+    "id": "niche-001",
+    "category": "icp",
+    "title": "Niche depth over market breadth",
+    "text": "Going narrow in a niche feels risky but produces better results. A tool specifically for UK solo letting agents will outperform a generic 'AI for estate agents' in conversion, retention, and word-of-mouth. Niche buyers refer to each other, use the same language, and have the same objections.",
+    "tags": ["icp", "niche", "go-to-market"]
+  },
+  {
+    "id": "onboarding-001",
+    "category": "bonuses",
+    "title": "Reduce setup friction aggressively",
+    "text": "The biggest post-purchase risk is a buyer who does not complete setup and therefore never sees value. Offer done-for-you setup, a live onboarding call, or a pre-configured starting state that produces a result in the first session. Remove every step that requires technical knowledge or sustained effort.",
+    "tags": ["onboarding", "retention", "bonuses"]
+  },
+  {
+    "id": "cta-001",
+    "category": "outcome",
+    "title": "CTA matches commitment level",
+    "text": "A strong CTA does not ask for more commitment than the buyer is ready to give. 'Start for free' works earlier in the funnel. 'Book a 15-minute setup call' works when the buyer is warm. The CTA should match where the buyer is in their decision, not where you want them to be.",
+    "tags": ["cta", "conversion", "funnel"]
+  }
+]

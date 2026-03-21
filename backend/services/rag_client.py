@@ -1,43 +1,43 @@
+# backend/services/rag_client.py
+
+import json
 import os
-import httpx
-from dotenv import load_dotenv
+from pathlib import Path
 from models.schemas import EnrichedContext, Evidence
 
-load_dotenv()
+PRINCIPLES_PATH = Path(__file__).parent.parent / "data" / "principles.json"
 
-RAG_SERVICE_URL = os.getenv("RAG_SERVICE_URL", "http://localhost:8001")
+def _load_principles() -> list[dict]:
+    with open(PRINCIPLES_PATH) as f:
+        return json.load(f)
 
+def _score(chunk: dict, query_words: set[str]) -> int:
+    """
+    Simple overlap score between query words and chunk tags + category + principle text.
+    Higher = more relevant.
+    """
+    searchable = set(chunk["tags"]) | {chunk["category"]}
+    text_words = set(chunk["principle"].lower().split())
+    return len(query_words & searchable) * 3 + len(query_words & text_words)
 
-def _build_payload(context: EnrichedContext, evidence: Evidence) -> dict:
-    """Build the exact payload shape Mateen's /get_principles expects."""
-    competitors = evidence.competitors
-    pricing_low = evidence.pricing_range.low
-    pricing_high = evidence.pricing_range.high
+def _build_query_words(context: EnrichedContext, evidence: Evidence) -> set[str]:
+    """
+    Extract meaningful keywords from context and evidence to match against chunks.
+    """
+    text = " ".join(filter(None, [
+        context.idea,
+        context.niche,
+        context.target_customer,
+        context.core_pain,
+        context.existing_solutions,
+        # pull competitor names and quotes from evidence
+        " ".join(c.name for c in (evidence.competitors or []) if c.name),
+        " ".join(q.quote for q in (evidence.reddit_quotes or []) if q.quote),
+    ])).lower()
 
-    competitor_summary = ". ".join(
-        f"{c.name} ({c.pricing_found})" for c in competitors if c.name
-    ) or "No competitor data available"
-
-    reddit_summary = ". ".join(
-        f'"{q.quote}"' for q in evidence.reddit_quotes if q.quote
-    ) or "No Reddit data available"
-
-    return {
-        "idea_summary": context.idea,
-        "product_type": context.niche or "B2B SaaS",
-        "niche": context.niche,
-        "target_customer": context.target_customer,
-        "painful_problem": context.core_pain,
-        "desired_outcome": f"Solve: {context.core_pain}",
-        "existing_solutions": context.existing_solutions,
-        "evidence_summary": (
-            f"Competitors: {competitor_summary}. "
-            f"Pricing range: {pricing_low}–{pricing_high}. "
-            f"Customer quotes: {reddit_summary}"
-        ),
-        "max_principles": 5,
-    }
-
+    # strip common words, keep meaningful ones
+    stopwords = {"a","an","the","and","or","for","to","in","of","is","are","we","i","my","it","on","at","by"}
+    return {w for w in text.split() if len(w) > 3 and w not in stopwords}
 
 async def get_principles(
     context: EnrichedContext,
@@ -45,26 +45,51 @@ async def get_principles(
     categories: list[str] | None = None,
 ) -> list[dict]:
     """
-    Calls Mateen's RAG service POST /get_principles.
-    Returns [] on any failure — never raises, never blocks the pipeline.
-    Timeout: 5 seconds.
+    Retrieves the most relevant principles from principles.json.
+    No HTTP call, no external service — runs entirely in your backend process.
+    Returns top 5 as list[dict] with category + principle fields.
     """
     if evidence is None:
-        # Fallback: no evidence yet, build minimal payload
         from models.schemas import Evidence as EvidenceModel
         evidence = EvidenceModel()
 
-    payload = _build_payload(context, evidence)
-
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.post(
-                f"{RAG_SERVICE_URL}/get_principles",
-                json=payload,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data.get("principles", [])
+        principles = _load_principles()
+        query_words = _build_query_words(context, evidence)
+
+        # score every chunk
+        scored = [(chunk, _score(chunk, query_words)) for chunk in principles]
+
+        # sort by score descending, break ties by category variety
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        # pick top 5, ensuring we don't return 5 chunks from the same category
+        seen_categories = set()
+        selected = []
+        for chunk, score in scored:
+            cat = chunk["category"]
+            if cat not in seen_categories or score > 5:
+                selected.append(chunk)
+                seen_categories.add(cat)
+            if len(selected) == 5:
+                break
+
+        # return in the shape agent1 + prompt_builder expect
+        return [
+            {
+                "category": c["category"],
+                "principle": c["principle"],
+                "relevance_score": 1.0,  # no real score without embeddings
+            }
+            for c in selected
+        ]
+
     except Exception as e:
-        print(f"RAG client fallback (no principles): {e}")
-        return []
+        print(f"RAG retrieval failed: {e}")
+        return [
+            {"category": "icp",       "principle": "Narrow the ICP to a buyer with a specific urgent problem.", "relevance_score": 0.0},
+            {"category": "outcome",   "principle": "Make the outcome measurable and time-bound.", "relevance_score": 0.0},
+            {"category": "guarantee", "principle": "Use a guarantee that shifts risk from buyer to seller.", "relevance_score": 0.0},
+            {"category": "bonuses",   "principle": "Bonuses should remove the top objection to buying.", "relevance_score": 0.0},
+            {"category": "pricing",   "principle": "Frame price against the cost of not solving the problem.", "relevance_score": 0.0},
+        ]
