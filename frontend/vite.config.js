@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
         "/openapi.json": proxyTarget,
         "/intake": proxyTarget,
         "/generate": proxyTarget,
-        "/p": proxyTarget
+        "^/p/": { target: proxyTarget, changeOrigin: true },
+        "/api/preview": proxyTarget
       }
     }
   };

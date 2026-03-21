@@ -1,0 +1,98 @@
+{
+  "slug": "reply-enquiries-30-seconds",
+  "meta": {
+    "page_title": "Never Lose a Letting Enquiry Again \u2014 30-Second Auto Reply for Solo Agents",
+    "eyebrow": "For solo letting agents managing 20\u201380 properties who lose inbound leads to faster competitors"
+  },
+  "hero": {
+    "headline": "Never lose a letting enquiry again \u2014 reply in 30 seconds automatically",
+    "subheadline": "Solo letting agents using this stop losing tenants to faster competitors from day one",
+    "primary_cta": {
+      "label": "Start recovering leads today",
+      "href": "#close"
+    },
+    "microcopy": "30-day money-back guarantee \u2014 if you miss a single enquiry, we refund everything"
+  },
+  "problem": {
+    "heading": "You lose enquiries the moment you step away from your phone",
+    "body": "Rightmove and Zoopla enquiries sit unanswered for hours while prospects message faster competitors. By the time you see the notification, they've already agreed terms elsewhere. At \u00a31,200 per missed commission, every week without an instant reply costs you 3+ lost deals."
+  },
+  "features": {
+    "heading": "How it works",
+    "items": [
+      {
+        "number": "01",
+        "title": "Personalised replies in 30 seconds",
+        "body": "Every Rightmove and Zoopla enquiry gets an instant, custom response \u2014 so prospects feel heard before they shop around."
+      },
+      {
+        "number": "02",
+        "title": "Done-for-you Rightmove integration",
+        "body": "No setup headaches \u2014 we connect your accounts and handle the technical work so you focus on viewings."
+      },
+      {
+        "number": "03",
+        "title": "Built for solo agents, not big agencies",
+        "body": "Purpose-built for agents managing 20\u201380 properties \u2014 no bloat, no overpaying for features you'll never use."
+      }
+    ]
+  },
+  "proof": {
+    "heading": "Solo agents recover missed leads within days",
+    "quote": "I lose enquiries if I'm not glued to my phone. By the time I see it they've gone elsewhere.",
+    "body": "This resonates across r/LandlordUK and solo agent communities \u2014 the winners are those who reply first. Our users see results immediately because every incoming lead now gets a live response, not silence."
+  },
+  "offer": {
+    "heading": "Clear pricing. No surprises.",
+    "intro": "Here's exactly what you get and what it costs.",
+    "rows": [
+      {
+        "label": "Offer",
+        "value": "Automatic 30-second enquiry replies + Rightmove/Zoopla integration + 30-day lead recovery audit"
+      },
+      {
+        "label": "Price",
+        "value": "\u00a379/month"
+      },
+      {
+        "label": "Includes",
+        "value": "Unlimited enquiries, personalised responses, integration setup, lead audit, and email support"
+      },
+      {
+        "label": "Guarantee",
+        "value": "Miss a single enquiry in your first 30 days and get a full refund \u2014 no questions asked"
+      },
+      {
+        "label": "Best for",
+        "value": "Solo letting agents managing 20\u201380 properties who want to stop losing tenants to faster replies"
+      }
+    ]
+  },
+  "faq": {
+    "heading": "Questions answered",
+    "items": [
+      {
+        "question": "How is this different from LeadPro or PropertyFlow?",
+        "answer": "LeadPro (\u00a399/mo) is built for large agencies with complex workflows \u2014 overkill and confusing for solo agents. PropertyFlow (\u00a3149/mo) doesn't integrate with Rightmove and requires manual setup. We're \u00a379/mo, Rightmove-native, and designed specifically for your operation."
+      },
+      {
+        "question": "Will the replies sound generic or spammy?",
+        "answer": "No. Each reply is personalised to the specific property and prospect enquiry. They read like they came from you because they're tailored to your voice and the details of their interest."
+      },
+      {
+        "question": "What if I get a reply wrong or a prospect complains?",
+        "answer": "You stay in control. The automated reply gets the ball rolling and keeps leads warm \u2014 you handle the conversation from there. If you miss an enquiry, we refund you. There's zero risk in the first 30 days."
+      }
+    ]
+  },
+  "closing": {
+    "heading": "Stop losing \u00a31,200 commissions to slower replies",
+    "body": "Every week you wait, 3 enquiries go cold. Start recovering leads \u2014 and the commissions that follow \u2014 today.",
+    "primary_cta": {
+      "label": "Start recovering leads today",
+      "href": "#close"
+    },
+    "microcopy": "30-day guarantee. Cancel anytime. No credit card required to explore.",
+    "footer_note": "Built for UK solo letting agents. First integration is free."
+  }
+}

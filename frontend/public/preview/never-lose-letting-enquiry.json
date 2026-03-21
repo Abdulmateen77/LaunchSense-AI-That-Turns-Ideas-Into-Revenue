@@ -1,0 +1,102 @@
+{
+  "slug": "never-lose-letting-enquiry",
+  "meta": {
+    "page_title": "Never lose a letting enquiry again \u2014 30-second auto-reply for solo agents",
+    "eyebrow": "For solo letting agents managing 20\u201380 properties who lose tenants to faster competitors"
+  },
+  "hero": {
+    "headline": "Never lose a letting enquiry again",
+    "subheadline": "Solo letting agents using this stop losing tenants to faster competitors from day one",
+    "primary_cta": {
+      "label": "Start recovering leads today",
+      "href": "#close"
+    },
+    "microcopy": "30-second setup. First 30 days risk-free."
+  },
+  "problem": {
+    "heading": "You're losing \u00a33,600 every week you wait",
+    "body": "Every Rightmove and Zoopla enquiry you miss while you're busy is going to a competitor who replies in minutes. Solo agents lose an average of 3 enquiries per week to slow response times \u2014 that's \u00a33,600 in lost commission. By the time you see the notification, the tenant has already moved on."
+  },
+  "features": {
+    "heading": "How you recover every lead",
+    "items": [
+      {
+        "number": "01",
+        "title": "30-second personalised reply",
+        "body": "Every Rightmove and Zoopla enquiry gets an instant, personalised response before your competitors even see it."
+      },
+      {
+        "number": "02",
+        "title": "Done-for-you Rightmove integration",
+        "body": "No setup hassle \u2014 we connect directly to your Rightmove account and start capturing leads immediately."
+      },
+      {
+        "number": "03",
+        "title": "Built for solo agents under 80 properties",
+        "body": "Purpose-built for your workflow, not over-engineered for large agencies that need complexity you'll never use."
+      }
+    ]
+  },
+  "proof": {
+    "heading": "Real solo agents are winning back leads",
+    "quote": "I lose enquiries if I'm not glued to my phone. By the time I see it they've gone elsewhere.",
+    "body": "This is the feedback from solo letting agents managing 20\u201380 properties. Instant reply automation closes that gap entirely \u2014 tenants get answered, you get the booking."
+  },
+  "offer": {
+    "heading": "Your risk-free offer",
+    "intro": "Here's exactly what you get and what we guarantee:",
+    "rows": [
+      {
+        "label": "Offer",
+        "value": "Automatic 30-second replies to every Rightmove and Zoopla enquiry + done-for-you integration + 30-day lead recovery audit"
+      },
+      {
+        "label": "Price",
+        "value": "\u00a379/month (competitors charge \u00a399\u2013\u00a3149/month)"
+      },
+      {
+        "label": "Includes",
+        "value": "Rightmove connection, Zoopla connection, lead recovery audit, email and portal support"
+      },
+      {
+        "label": "Guarantee",
+        "value": "Miss a single enquiry in your first 30 days and we refund everything \u2014 no questions"
+      },
+      {
+        "label": "Best for",
+        "value": "Solo letting agents managing 20\u201380 properties in the UK losing tenants to slow response times"
+      }
+    ]
+  },
+  "faq": {
+    "heading": "Questions answered",
+    "items": [
+      {
+        "question": "Will tenants think the reply is automated?",
+        "answer": "No. Your reply is fully personalised to their specific enquiry \u2014 they see your name, their property details, and a genuine next step. It feels like you replied instantly, because you did."
+      },
+      {
+        "question": "What if I'm already using another property management tool?",
+        "answer": "We integrate directly with Rightmove and Zoopla \u2014 the platforms tenants use to find you. No need to change your existing workflow; we sit alongside it."
+      },
+      {
+        "question": "How long does setup take?",
+        "answer": "30 seconds. Connect your Rightmove account, we handle the rest. Your first enquiry reply happens automatically within 24 hours."
+      },
+      {
+        "question": "Is this only for Rightmove and Zoopla?",
+        "answer": "Currently yes \u2014 these are where 90% of UK tenant enquiries come from. We chose depth over breadth to serve solo agents best."
+      }
+    ]
+  },
+  "closing": {
+    "heading": "Stop losing \u00a33,600 every week",
+    "body": "Every day without this costs you 3 missed enquiries. Start your 30-day risk-free trial today.",
+    "primary_cta": {
+      "label": "Start recovering leads today",
+      "href": "#close"
+    },
+    "microcopy": "No card required. Cancel anytime.",
+    "footer_note": "30-day money-back guarantee if you miss a single enquiry."
+  }
+}
