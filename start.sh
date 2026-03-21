@@ -21,7 +21,7 @@ PYTHONPATH="$RAG_APP_DIR" "$RAG_VENV" ingest.py
 cd "$ROOT"
 
 echo "Starting RAG service on :8001..."
-PYTHONPATH="$RAG_APP_DIR" "$RAG_VENV" -m uvicorn main:app --port 8001 --app-dir "$RAG_APP_DIR" &
+PYTHONPATH="$RAG_APP_DIR" ANONYMIZED_TELEMETRY=False "$RAG_VENV" -m uvicorn main:app --port 8001 --app-dir "$RAG_APP_DIR" &
 RAG_PID=$!
 
 # --- Main backend ---
