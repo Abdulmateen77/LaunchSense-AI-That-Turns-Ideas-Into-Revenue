@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { exportPackageAsText, downloadTextFile } from "../lib/exportPackage";
 
 function CopyButton({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
@@ -22,8 +23,7 @@ function CopyButton({ text, label = "Copy" }) {
   );
 }
 
-function CollapsibleSection({ title, children, copyText = null, defaultOpen = true }) {
-  const [open, setOpen] = useState(defaultOpen);
+function CollapsibleSection({ title, children, copyText = null, defaultOpen = true }) {  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <section className="structured-section">
@@ -150,7 +150,7 @@ function renderContextCard(message) {
 
   return (
     <div className="structured-card">
-      <p className="message-card__eyebrow">Context captured — analysing your idea...</p>
+      <p className="message-card__eyebrow">Your brief</p>
       <DataRow label="Idea" value={context.idea} multiline />
       <DataRow label="Niche" value={context.niche} multiline />
       <DataRow label="Target customer" value={context.target_customer} multiline />
@@ -170,81 +170,121 @@ function renderResearchCard(message) {
 
   return (
     <div className="structured-card">
-      <p className="message-card__eyebrow">Research</p>
+      <p className="message-card__eyebrow">Market research</p>
 
-      <section className="structured-section">
-        <h3>Competitors</h3>
+      <CollapsibleSection title={`Competitors (${competitors.length})`} defaultOpen={true}>
         {competitors.length ? (
           <ul className="structured-list">
             {competitors.map((competitor) => (
               <li key={`${competitor.name}-${competitor.url}`}>
                 <strong>{competitor.name}</strong>
                 <span>{competitor.pricing_found}</span>
-                <span>{competitor.weakness}</span>
+                <span className="text-muted">{competitor.weakness}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="structured-empty">No competitors returned.</p>
+          <p className="structured-empty">No competitors found.</p>
         )}
-      </section>
+      </CollapsibleSection>
 
-      <section className="structured-section">
-        <h3>Customer Quotes</h3>
+      <CollapsibleSection title={`Customer quotes (${quotes.length})`} defaultOpen={true}>
         {quotes.length ? (
           <ul className="structured-list">
             {quotes.map((quote) => (
               <li key={`${quote.thread_url}-${quote.subreddit}`}>
                 <strong>r/{quote.subreddit}</strong>
-                <span>{quote.quote}</span>
-                <span>{quote.upvotes} upvotes</span>
+                <span>"{quote.quote}"</span>
+                <span className="text-muted">{quote.upvotes} upvotes</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="structured-empty">No Reddit quotes returned.</p>
+          <p className="structured-empty">No quotes found.</p>
         )}
-      </section>
+      </CollapsibleSection>
 
-      <section className="structured-section">
-        <h3>Market Signals</h3>
-        {signals.length ? (
+      {signals.length ? (
+        <CollapsibleSection title={`Market signals (${signals.length})`} defaultOpen={false}>
           <ul className="structured-list">
             {signals.map((signal) => (
               <li key={`${signal.signal}-${signal.source}`}>
                 <span>{signal.signal}</span>
-                <span>{signal.source}</span>
+                <span className="text-muted">{signal.source}</span>
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="structured-empty">No market signals returned.</p>
-        )}
-      </section>
+        </CollapsibleSection>
+      ) : null}
 
       {pricingRange ? (
-        <section className="structured-section">
-          <h3>Pricing Range</h3>
+        <CollapsibleSection title="Pricing range" defaultOpen={false}>
           <DataRow label="Low" value={pricingRange.low} />
           <DataRow label="High" value={pricingRange.high} />
           <DataRow label="Insight" value={pricingRange.insight} multiline />
-        </section>
+        </CollapsibleSection>
       ) : null}
     </div>
   );
 }
 
-function renderOfferCard(message) {
+function EditableField({ label, value, multiline = false }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value || "");
+
+  if (!value && !editing) return null;
+
+  return (
+    <div className={`data-row data-row--editable ${editing ? "data-row--editing" : ""}`}>
+      <div className="data-row__label-row">
+        <span className="data-row__label">{label}</span>
+        <button
+          type="button"
+          className="edit-btn"
+          onClick={() => setEditing(e => !e)}
+        >
+          {editing ? "Done" : "Edit"}
+        </button>
+      </div>
+      {editing ? (
+        <textarea
+          className="edit-textarea"
+          value={draft}
+          rows={multiline ? 3 : 1}
+          onChange={e => setDraft(e.target.value)}
+          autoFocus
+        />
+      ) : (
+        <span className={`data-row__value ${multiline ? "data-row__value--multiline" : ""}`}>
+          {draft}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function OfferCard({ message, onStartGeneration }) {
   const offer = message.data?.offer;
   const evaluation = message.data?.eval;
 
-  if (!offer) {
-    return null;
+  if (!offer) return null;
+
+  function handleRegen() {
+    if (window.confirm("Regenerate the full launch package? This takes ~90 seconds and will replace the current results.")) {
+      onStartGeneration();
+    }
   }
 
   return (
     <div className="structured-card">
-      <p className="message-card__eyebrow">Offer</p>
+      <div className="offer-card__header">
+        <p className="message-card__eyebrow">Offer</p>
+        {onStartGeneration ? (
+          <button type="button" className="regen-btn" onClick={handleRegen} title="Re-run the full pipeline">
+            ↺ Regenerate
+          </button>
+        ) : null}
+      </div>
 
       {evaluation ? (
         <section className="structured-section">
@@ -258,23 +298,23 @@ function renderOfferCard(message) {
 
       <section className="structured-section">
         <h3>ICP</h3>
-        <DataRow label="Who" value={offer.icp?.who} multiline />
-        <DataRow label="Pain" value={offer.icp?.pain} multiline />
-        <DataRow label="Trigger" value={offer.icp?.trigger} multiline />
-        <DataRow label="Evidence" value={offer.icp?.evidence_source} multiline />
+        <EditableField label="Who" value={offer.icp?.who} multiline />
+        <EditableField label="Pain" value={offer.icp?.pain} multiline />
+        <EditableField label="Trigger" value={offer.icp?.trigger} multiline />
+        <EditableField label="Evidence" value={offer.icp?.evidence_source} multiline />
       </section>
 
       <section className="structured-section">
         <h3>Positioning</h3>
-        <DataRow label="Headline" value={offer.headline} multiline />
-        <DataRow label="Subheadline" value={offer.subheadline} multiline />
-        <DataRow label="Outcome" value={offer.outcome} multiline />
-        <DataRow label="Price" value={offer.price} />
-        <DataRow label="Price anchor" value={offer.price_anchor} multiline />
-        <DataRow label="Guarantee" value={offer.guarantee} multiline />
-        <DataRow label="Urgency" value={offer.urgency} multiline />
-        <DataRow label="CTA" value={offer.cta} multiline />
-        <DataRow label="Competitor gap" value={offer.competitor_gap} multiline />
+        <EditableField label="Headline" value={offer.headline} multiline />
+        <EditableField label="Subheadline" value={offer.subheadline} multiline />
+        <EditableField label="Outcome" value={offer.outcome} multiline />
+        <EditableField label="Price" value={offer.price} />
+        <EditableField label="Price anchor" value={offer.price_anchor} multiline />
+        <EditableField label="Guarantee" value={offer.guarantee} multiline />
+        <EditableField label="Urgency" value={offer.urgency} multiline />
+        <EditableField label="CTA" value={offer.cta} multiline />
+        <EditableField label="Competitor gap" value={offer.competitor_gap} multiline />
       </section>
 
       {Array.isArray(offer.bonuses) && offer.bonuses.length ? (
@@ -282,9 +322,7 @@ function renderOfferCard(message) {
           <h3>Bonuses</h3>
           <ul className="structured-list">
             {offer.bonuses.map((bonus) => (
-              <li key={bonus}>
-                <span>{bonus}</span>
-              </li>
+              <li key={bonus}><span>{bonus}</span></li>
             ))}
           </ul>
         </section>
@@ -293,13 +331,60 @@ function renderOfferCard(message) {
   );
 }
 
+function ShareButton({ url }) {
+  const [copied, setCopied] = useState(false);
+
+  if (!url) return null;
+
+  function handleShare() {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      className={`copy-btn ${copied ? "copy-btn--copied" : ""}`}
+      onClick={handleShare}
+      aria-label="Copy share link"
+    >
+      {copied ? "Copied!" : "Share link"}
+    </button>
+  );
+}
+
+function ExportButton({ offer, growth, page, critique }) {
+  function handleExport() {
+    const text = exportPackageAsText({ offer, growth, page, critique });
+    const slug = page?.slug || "launch-package";
+    downloadTextFile(`${slug}.txt`, text);
+  }
+
+  return (
+    <button type="button" className="export-btn" onClick={handleExport}>
+      ↓ Export .txt
+    </button>
+  );
+}
+
 function renderAssetsCard(message) {
   const page = message.data?.page;
   const growth = message.data?.growth;
+  const offer = message.data?.offer;
+  const critique = message.data?.critique;
+  const shareUrl = page?.absoluteUrl || (page?.url ? `${window.location.origin}${page.url}` : null);
 
   return (
     <div className="structured-card">
-      <p className="message-card__eyebrow">Assets</p>
+      <div className="assets-card__header">
+        <p className="message-card__eyebrow">Assets</p>
+        <div className="assets-card__actions">
+          <ShareButton url={shareUrl} />
+          <ExportButton offer={offer} growth={growth} page={page} critique={critique} />
+        </div>
+      </div>
 
       {page ? (
         <CollapsibleSection title="Landing Page">
@@ -368,7 +453,7 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
     case "research":
       return renderResearchCard(message);
     case "offer":
-      return renderOfferCard(message);
+      return <OfferCard message={message} onStartGeneration={onStartGeneration} />;
     case "assets":
       return renderAssetsCard(message);
     case "validation":
@@ -376,10 +461,9 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
       return null;
     case "status":
       return (
-        <>
-          <p className="message-card__eyebrow">Status</p>
-          <p className="message-card__text">{message.text}</p>
-        </>
+        <p className="message-card__text message-card__text--status">
+          <span className="status-spinner" aria-hidden="true">⏳</span> {message.text}
+        </p>
       );
     case "critique":
       return (

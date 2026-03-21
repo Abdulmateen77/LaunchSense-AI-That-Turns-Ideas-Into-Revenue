@@ -716,7 +716,9 @@ export function chatReducer(state, action) {
                 kind: "assets",
                 data: {
                   page: thread.results.page,
-                  growth: action.data
+                  growth: action.data,
+                  offer: thread.results.offer,
+                  critique: thread.results.critique || ""
                 }
               })
             ];

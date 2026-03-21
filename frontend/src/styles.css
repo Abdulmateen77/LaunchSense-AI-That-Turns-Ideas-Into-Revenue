@@ -472,6 +472,20 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.message-card__text--status {
+  color: var(--muted-strong);
+  font-size: 0.88rem;
+}
+
+.status-spinner {
+  font-style: normal;
+}
+
+.text-muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
 .message-card__eyebrow {
   margin: 0 0 0.7rem;
   color: var(--muted);
@@ -922,6 +936,15 @@ textarea {
     transform: translateX(-100%);
   }
 
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 9;
+    backdrop-filter: blur(2px);
+  }
+
   .welcome-grid {
     grid-template-columns: 1fr;
   }
@@ -947,6 +970,22 @@ textarea {
   .chat-header__status {
     width: 100%;
     white-space: normal;
+  }
+
+  /* Progress bar wraps on mobile */
+  .gen-progress {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .gen-progress__line {
+    display: none;
+  }
+
+  .gen-progress__step {
+    flex-direction: row;
+    flex: unset;
+    gap: 0.4rem;
   }
 }
 
@@ -1316,4 +1355,148 @@ textarea {
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* Backdrop only exists on mobile */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* ── Welcome panel enhancements ─────────────────────────────── */
+
+.welcome-panel__try {
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.welcome-card__cta {
+  margin-top: 0.2rem;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.welcome-card:hover .welcome-card__cta {
+  opacity: 1;
+}
+
+/* ── Assets card header + export button ─────────────────────── */
+
+.assets-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.assets-card__header .message-card__eyebrow {
+  margin: 0;
+}
+
+.assets-card__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.export-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-strong);
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.export-btn:hover {
+  background: var(--hover);
+  border-color: var(--line-strong);
+}
+
+/* ── Offer card inline editing ───────────────────────────────── */
+
+.offer-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.offer-card__header .message-card__eyebrow {
+  margin: 0;
+}
+
+.regen-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.regen-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.data-row__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.edit-btn {
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  transition: color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.data-row--editable:hover .edit-btn,
+.data-row--editing .edit-btn {
+  opacity: 1;
+}
+
+.edit-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--panel-muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 0.5rem;
+  resize: vertical;
+  outline: none;
+}
+
+.edit-textarea:focus {
+  border-color: #93c5fd;
+  background: #ffffff;
 }

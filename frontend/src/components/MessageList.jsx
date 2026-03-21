@@ -60,9 +60,7 @@ export function MessageList({
                 <GenerationProgress stage={stage} />
               </div>
             </div>
-          ) : null}
-
-          {isBusy ? (
+          ) : isBusy ? (
             <div className="message-row">
               <div className="message-avatar message-avatar--assistant">AI</div>
               <div className="typing-card" aria-label="Assistant is typing">

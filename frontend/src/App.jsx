@@ -392,6 +392,7 @@ export default function App() {
         isCollapsed={state.isSidebarCollapsed}
         onSelectThread={handleSelectThread}
         onNewChat={handleNewChat}
+        onClose={() => dispatch({ type: chatActionTypes.SET_SIDEBAR_COLLAPSED, value: true })}
       />
 
       <main className="chat-shell">
