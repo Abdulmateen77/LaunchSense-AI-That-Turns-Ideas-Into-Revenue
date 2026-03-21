@@ -1,3 +1,27 @@
+import { useState } from "react";
+
+function CopyButton({ text, label = "Copy" }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      className={`copy-btn ${copied ? "copy-btn--copied" : ""}`}
+      onClick={handleCopy}
+      aria-label={`Copy ${label}`}
+    >
+      {copied ? "Copied!" : label}
+    </button>
+  );
+}
+
 function renderMarkdown(text) {
   if (!text) return null;
   const lines = text.split("\n");
@@ -274,7 +298,13 @@ function renderAssetsCard(message) {
 
       {growth?.cold_email ? (
         <section className="structured-section">
-          <h3>Cold Email</h3>
+          <div className="structured-section__header">
+            <h3>Cold Email</h3>
+            <CopyButton
+              label="Copy email"
+              text={`Subject: ${growth.cold_email.subject}\n\n${growth.cold_email.body}\n\nPS: ${growth.cold_email.ps}`}
+            />
+          </div>
           <DataRow label="Subject" value={growth.cold_email.subject} multiline />
           <DataRow label="Body" value={growth.cold_email.body} multiline />
           <DataRow label="Evidence line" value={growth.cold_email.evidence_line} multiline />
@@ -285,21 +315,33 @@ function renderAssetsCard(message) {
 
       {growth?.linkedin_dm ? (
         <section className="structured-section">
-          <h3>LinkedIn DM</h3>
+          <div className="structured-section__header">
+            <h3>LinkedIn DM</h3>
+            <CopyButton label="Copy DM" text={growth.linkedin_dm} />
+          </div>
           <p className="message-card__pre">{growth.linkedin_dm}</p>
         </section>
       ) : null}
 
       {growth?.luffa_dm ? (
         <section className="structured-section">
-          <h3>Luffa DM</h3>
+          <div className="structured-section__header">
+            <h3>Luffa DM</h3>
+            <CopyButton label="Copy DM" text={growth.luffa_dm} />
+          </div>
           <p className="message-card__pre">{growth.luffa_dm}</p>
         </section>
       ) : null}
 
       {Array.isArray(growth?.hooks) && growth.hooks.length ? (
         <section className="structured-section">
-          <h3>Hooks</h3>
+          <div className="structured-section__header">
+            <h3>Hooks</h3>
+            <CopyButton
+              label="Copy all"
+              text={growth.hooks.map(h => `[${h.platform}]\n${h.hook}`).join("\n\n")}
+            />
+          </div>
           <ul className="structured-list">
             {growth.hooks.map((hook) => (
               <li key={`${hook.platform}-${hook.hook}`}>

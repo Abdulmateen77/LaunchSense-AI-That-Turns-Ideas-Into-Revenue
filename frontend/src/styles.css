@@ -1163,3 +1163,39 @@ textarea {
 .md-ul li, .md-ol li { margin: 0.25rem 0; }
 .md-hr { border: none; border-top: 1px solid var(--line); margin: 0.8rem 0; }
 .critique-card { width: 100%; }
+
+/* ── Copy button ─────────────────────────────────────────────── */
+
+.structured-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.structured-section__header h3 {
+  margin: 0;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-strong);
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.copy-btn:hover {
+  background: var(--hover);
+}
+
+.copy-btn--copied {
+  color: #166534;
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+}
