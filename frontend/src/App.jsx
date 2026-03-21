@@ -230,8 +230,15 @@ export default function App() {
       const validation = await validateIdea(context);
       dispatch({ type: chatActionTypes.VALIDATION_RECEIVED, threadId, validation });
     } catch (error) {
-      const errorMessage = formatError(error);
-      dispatch({ type: chatActionTypes.THREAD_ERROR_RECORDED, threadId, errorMessage });
+      // If validate endpoint is unavailable, skip straight to generation
+      const msg = formatError(error).toLowerCase();
+      if (msg.includes("not found") || msg.includes("404") || msg.includes("failed to fetch") || msg.includes("network")) {
+        dispatch({ type: chatActionTypes.VALIDATION_SKIPPED, threadId });
+        await startGeneration(threadId);
+      } else {
+        const errorMessage = formatError(error);
+        dispatch({ type: chatActionTypes.THREAD_ERROR_RECORDED, threadId, errorMessage });
+      }
     }
   }
 

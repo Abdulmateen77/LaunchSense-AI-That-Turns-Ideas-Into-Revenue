@@ -25,6 +25,7 @@ export const chatActionTypes = Object.freeze({
   INTAKE_RESPONSE_RECEIVED: "INTAKE_RESPONSE_RECEIVED",
   VALIDATION_STARTED: "VALIDATION_STARTED",
   VALIDATION_RECEIVED: "VALIDATION_RECEIVED",
+  VALIDATION_SKIPPED: "VALIDATION_SKIPPED",
   THREAD_ERROR_RECORDED: "THREAD_ERROR_RECORDED",
   GENERATION_STARTED: "GENERATION_STARTED",
   GENERATION_EVENT_RECEIVED: "GENERATION_EVENT_RECEIVED",
@@ -566,6 +567,16 @@ export function chatReducer(state, action) {
             data: action.validation
           })
         ]
+      }));
+
+    case chatActionTypes.VALIDATION_SKIPPED:
+      return updateThread(state, action.threadId, (thread) => ({
+        ...thread,
+        busy: false,
+        phase: THREAD_MODES.VALIDATION_READY,
+        stage: THREAD_STAGES.VALIDATION_READY,
+        updatedAt: "Just now",
+        error: null
       }));
 
     case chatActionTypes.THREAD_ERROR_RECORDED:
