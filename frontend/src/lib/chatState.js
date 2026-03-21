@@ -4,6 +4,8 @@ const THREAD_STAGES = Object.freeze({
   WELCOME: "welcome",
   INTAKE: "intake",
   CONTEXT_READY: "context_ready",
+  VALIDATING: "validating",
+  VALIDATION_READY: "validation_ready",
   RESEARCH: "research",
   OFFER: "offer",
   ASSETS: "assets",
@@ -21,6 +23,8 @@ export const chatActionTypes = Object.freeze({
   LOCAL_THREAD_NOTE_ADDED: "LOCAL_THREAD_NOTE_ADDED",
   INTAKE_REQUEST_STARTED: "INTAKE_REQUEST_STARTED",
   INTAKE_RESPONSE_RECEIVED: "INTAKE_RESPONSE_RECEIVED",
+  VALIDATION_STARTED: "VALIDATION_STARTED",
+  VALIDATION_RECEIVED: "VALIDATION_RECEIVED",
   THREAD_ERROR_RECORDED: "THREAD_ERROR_RECORDED",
   GENERATION_STARTED: "GENERATION_STARTED",
   GENERATION_EVENT_RECEIVED: "GENERATION_EVENT_RECEIVED",
@@ -49,7 +53,8 @@ export function createEmptyResults() {
     page: null,
     growth: null,
     critique: "",
-    storedPackage: null
+    storedPackage: null,
+    validation: null
   };
 }
 
@@ -225,7 +230,7 @@ function upsertCritiqueMessage(messages, critiqueText) {
 
 function getErrorRecoveryPhase(thread) {
   if (thread.context) {
-    return THREAD_MODES.CONTEXT_READY;
+    return THREAD_MODES.VALIDATION_READY;
   }
 
   if (thread.messages.length > 0) {
@@ -237,7 +242,7 @@ function getErrorRecoveryPhase(thread) {
 
 function getErrorRecoveryStage(thread) {
   if (thread.context) {
-    return THREAD_STAGES.CONTEXT_READY;
+    return THREAD_STAGES.VALIDATION_READY;
   }
 
   if (thread.messages.length > 0) {
@@ -265,11 +270,17 @@ export function selectActiveThread(state) {
 }
 
 export function canStartGeneration(thread) {
-  return Boolean(thread?.context) && !thread?.busy;
+  return Boolean(thread?.context) && !thread?.busy && thread?.phase === THREAD_MODES.VALIDATION_READY;
 }
 
 export function isComposerDisabled(thread) {
-  return !thread || thread.busy || thread.phase === THREAD_MODES.GENERATING;
+  return (
+    !thread ||
+    thread.busy ||
+    thread.phase === THREAD_MODES.GENERATING ||
+    thread.phase === THREAD_MODES.VALIDATING ||
+    thread.phase === THREAD_MODES.VALIDATION_READY
+  );
 }
 
 export function getComposerPlaceholder(thread) {
@@ -281,8 +292,12 @@ export function getComposerPlaceholder(thread) {
     return "Answer the intake question so LaunchSense can complete your context...";
   }
 
-  if (thread.phase === THREAD_MODES.CONTEXT_READY) {
-    return "Confirm or correct the context in chat, or use the inline button to generate.";
+  if (thread.phase === THREAD_MODES.CONTEXT_READY || thread.phase === THREAD_MODES.VALIDATING) {
+    return "Analysing your idea...";
+  }
+
+  if (thread.phase === THREAD_MODES.VALIDATION_READY) {
+    return "Review the analysis above, then confirm to generate your launch package.";
   }
 
   if (thread.phase === THREAD_MODES.GENERATING) {
@@ -519,6 +534,39 @@ export function chatReducer(state, action) {
           }
         };
       });
+
+    case chatActionTypes.VALIDATION_STARTED:
+      return updateThread(state, action.threadId, (thread) => ({
+        ...thread,
+        busy: true,
+        phase: THREAD_MODES.VALIDATING,
+        stage: THREAD_STAGES.VALIDATING,
+        preview: "Analysing your idea...",
+        updatedAt: "Just now",
+        error: null
+      }));
+
+    case chatActionTypes.VALIDATION_RECEIVED:
+      return updateThread(state, action.threadId, (thread) => ({
+        ...thread,
+        busy: false,
+        phase: THREAD_MODES.VALIDATION_READY,
+        stage: THREAD_STAGES.VALIDATION_READY,
+        preview: action.validation.verdict || "Idea analysed",
+        updatedAt: "Just now",
+        results: {
+          ...thread.results,
+          validation: action.validation
+        },
+        messages: [
+          ...thread.messages,
+          createMessage({
+            role: "assistant",
+            kind: "validation",
+            data: action.validation
+          })
+        ]
+      }));
 
     case chatActionTypes.THREAD_ERROR_RECORDED:
       return updateThread(state, action.threadId, (thread) => ({

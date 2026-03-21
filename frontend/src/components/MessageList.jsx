@@ -1,16 +1,20 @@
 import { useLayoutEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
+import { ValidationCard } from "./ValidationCard";
 
-export function MessageList({ messages, isBusy, canStartGeneration, onStartGeneration }) {
+export function MessageList({
+  messages,
+  isBusy,
+  canStartGeneration,
+  onStartGeneration,
+  onConfirmValidation,
+  onSelectAlternative
+}) {
   const listRef = useRef(null);
 
   useLayoutEffect(() => {
     const list = listRef.current;
-
-    if (!list) {
-      return;
-    }
-
+    if (!list) return;
     list.scrollTop = list.scrollHeight;
   }, [messages, isBusy]);
 
@@ -18,14 +22,32 @@ export function MessageList({ messages, isBusy, canStartGeneration, onStartGener
     <div ref={listRef} className="message-list" aria-live="polite">
       <div className="message-column">
         <div className="message-stack">
-          {messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              canStartGeneration={canStartGeneration}
-              onStartGeneration={onStartGeneration}
-            />
-          ))}
+          {messages.map((message) => {
+            if (message.kind === "validation") {
+              return (
+                <div key={message.id} className="message-row">
+                  <div className="message-avatar message-avatar--assistant">AI</div>
+                  <div className="message-card" style={{ maxWidth: "calc(100% - 3rem)", width: "100%" }}>
+                    <ValidationCard
+                      data={message.data}
+                      disabled={isBusy}
+                      onConfirm={onConfirmValidation}
+                      onSelectAlternative={onSelectAlternative}
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                canStartGeneration={canStartGeneration}
+                onStartGeneration={onStartGeneration}
+              />
+            );
+          })}
 
           {isBusy ? (
             <div className="message-row">

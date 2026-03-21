@@ -89,6 +89,15 @@ export async function sendIntakeMessage(input) {
   return normalizeIntakeResponse(await parseJsonResponse(response));
 }
 
+export async function validateIdea(context) {
+  const response = await fetch(`${API_BASE_URL}/validate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ context })
+  });
+  return parseJsonResponse(response);
+}
+
 export async function fetchStoredPackage(slug) {
   if (isMockMode()) {
     return normalizeStoredPackage(await mockFetchStoredPackage(slug));

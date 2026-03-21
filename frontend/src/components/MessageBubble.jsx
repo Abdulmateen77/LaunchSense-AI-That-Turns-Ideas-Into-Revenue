@@ -253,6 +253,9 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
       return renderOfferCard(message);
     case "assets":
       return renderAssetsCard(message);
+    case "validation":
+      // ValidationCard is rendered directly in MessageList with callbacks — skip here
+      return null;
     case "status":
       return (
         <>
