@@ -1801,3 +1801,312 @@ textarea {
 .fb-ad-preview__cta-btn:hover {
   background: #d8dadf;
 }
+
+/* ── Grand Slam Offer card ───────────────────────────────────── */
+
+.offer-gso {
+  display: grid;
+  gap: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.offer-gso__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.1rem;
+  background: #0f172a;
+  gap: 0.5rem;
+}
+
+.offer-gso__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.offer-gso__hero {
+  padding: 1.5rem 1.25rem 1.1rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-bottom: 1px solid #1e293b;
+}
+
+.offer-gso__headline {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+}
+
+.offer-gso__subheadline {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.offer-gso__icp {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+
+.offer-gso__icp-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.offer-gso__icp-who {
+  font-size: 0.88rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.offer-gso__pain-block {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.offer-gso__pain-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.offer-gso__pain-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.offer-gso__pain-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.offer-gso__pain-text {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.offer-gso__section {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-muted);
+}
+
+.offer-gso__section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.65rem;
+}
+
+/* Value stack */
+.value-stack {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.value-stack__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+}
+
+.value-stack__check {
+  color: #16a34a;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+.value-stack__label {
+  flex: 1;
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.value-stack__value {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.value-stack__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #166534;
+  margin-top: 0.2rem;
+}
+
+/* Bonuses */
+.offer-gso__bonuses {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.offer-gso__bonus-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.offer-gso__bonus-num {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #6366f1;
+  background: #eef2ff;
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.35rem;
+  letter-spacing: 0.02em;
+}
+
+/* Guarantee */
+.offer-gso__guarantee {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: #f0fdf4;
+  border-bottom: 1px solid #bbf7d0;
+}
+
+.offer-gso__guarantee-badge {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.offer-gso__guarantee-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #166534;
+  margin-bottom: 0.25rem;
+}
+
+.offer-gso__guarantee-text {
+  font-size: 0.9rem;
+  color: #14532d;
+  line-height: 1.6;
+}
+
+/* Pricing */
+.offer-gso__pricing {
+  padding: 1rem 1.25rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.offer-gso__anchor {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.offer-gso__price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.offer-gso__price-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.offer-gso__price {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+/* Urgency */
+.offer-gso__urgency {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.25rem;
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  font-size: 0.88rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.offer-gso__urgency-icon {
+  flex-shrink: 0;
+}
+
+/* CTA block */
+.offer-gso__cta-block {
+  padding: 1rem 1.25rem;
+  background: var(--panel-muted);
+}
+
+.offer-gso__cta-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-bottom: 0.4rem;
+}
+
+.offer-gso__gap {
+  font-size: 0.84rem;
+  color: var(--muted-strong);
+  line-height: 1.55;
+}

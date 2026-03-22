@@ -254,11 +254,44 @@ function EditableField({ label, value, multiline = false }) {
   );
 }
 
+// Estimated values for the value stack — derived from price if possible
+const VALUE_MULTIPLIERS = [2.4, 1.6, 1.2, 0.8, 0.4, 0.3];
+
+function parsePrice(priceStr) {
+  if (!priceStr) return null;
+  const match = priceStr.match(/[\d,]+/);
+  return match ? parseInt(match[0].replace(/,/g, ""), 10) : null;
+}
+
+function ValueStackItem({ label, value }) {
+  return (
+    <div className="value-stack__item">
+      <span className="value-stack__check">✓</span>
+      <span className="value-stack__label">{label}</span>
+      <span className="value-stack__value">{value}</span>
+    </div>
+  );
+}
+
 function OfferCard({ message, onStartGeneration }) {
   const offer = message.data?.offer;
   const evaluation = message.data?.eval;
 
   if (!offer) return null;
+
+  const priceNum = parsePrice(offer.price);
+
+  // Build value stack items from offer fields
+  const valueItems = [
+    offer.outcome && { label: offer.outcome, mult: VALUE_MULTIPLIERS[0] },
+    offer.competitor_gap && { label: offer.competitor_gap, mult: VALUE_MULTIPLIERS[1] },
+    offer.guarantee && { label: `Guarantee: ${offer.guarantee}`, mult: VALUE_MULTIPLIERS[2] },
+    offer.icp?.trigger && { label: `Trigger support: ${offer.icp.trigger}`, mult: VALUE_MULTIPLIERS[3] },
+  ].filter(Boolean);
+
+  const totalValue = priceNum
+    ? valueItems.reduce((sum, item) => sum + Math.round(priceNum * item.mult), 0)
+    : null;
 
   function handleRegen() {
     if (window.confirm("Regenerate the full launch package? This takes ~90 seconds and will replace the current results.")) {
@@ -266,57 +299,154 @@ function OfferCard({ message, onStartGeneration }) {
     }
   }
 
+  const copyText = [
+    offer.headline,
+    "",
+    offer.subheadline,
+    "",
+    `For: ${offer.icp?.who}`,
+    `Pain: ${offer.icp?.pain}`,
+    "",
+    offer.outcome,
+    "",
+    offer.price_anchor,
+    `Investment: ${offer.price}`,
+    "",
+    `Guarantee: ${offer.guarantee}`,
+    "",
+    offer.urgency,
+    "",
+    `→ ${offer.cta}`,
+  ].filter(v => v !== undefined).join("\n");
+
   return (
-    <div className="structured-card">
-      <div className="offer-card__header">
-        <p className="message-card__eyebrow">Offer</p>
-        {onStartGeneration ? (
-          <button type="button" className="regen-btn" onClick={handleRegen} title="Re-run the full pipeline">
-            ↺ Regenerate
-          </button>
+    <div className="offer-gso">
+      {/* Header */}
+      <div className="offer-gso__header">
+        <span className="offer-gso__eyebrow">Grand Slam Offer</span>
+        <div style={{ display: "flex", gap: "0.4rem" }}>
+          <CopyButton text={copyText} label="Copy offer" />
+          {onStartGeneration ? (
+            <button type="button" className="regen-btn" onClick={handleRegen} title="Re-run the full pipeline">
+              ↺ Regenerate
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Dream Outcome hero */}
+      <div className="offer-gso__hero">
+        <h2 className="offer-gso__headline">{stripLeadingDash(offer.headline)}</h2>
+        <p className="offer-gso__subheadline">{stripLeadingDash(offer.subheadline)}</p>
+      </div>
+
+      {/* ICP pill */}
+      <div className="offer-gso__icp">
+        <span className="offer-gso__icp-label">For</span>
+        <span className="offer-gso__icp-who">{stripLeadingDash(offer.icp?.who)}</span>
+      </div>
+
+      {/* Pain + trigger */}
+      <div className="offer-gso__pain-block">
+        <div className="offer-gso__pain-row">
+          <span className="offer-gso__pain-icon">⚡</span>
+          <div>
+            <div className="offer-gso__pain-title">The pain</div>
+            <div className="offer-gso__pain-text">{stripLeadingDash(offer.icp?.pain)}</div>
+          </div>
+        </div>
+        {offer.icp?.trigger ? (
+          <div className="offer-gso__pain-row">
+            <span className="offer-gso__pain-icon">🎯</span>
+            <div>
+              <div className="offer-gso__pain-title">Buying trigger</div>
+              <div className="offer-gso__pain-text">{stripLeadingDash(offer.icp.trigger)}</div>
+            </div>
+          </div>
         ) : null}
       </div>
 
+      {/* Value stack */}
+      {valueItems.length ? (
+        <div className="offer-gso__section">
+          <div className="offer-gso__section-label">What you get</div>
+          <div className="value-stack">
+            {valueItems.map((item, i) => (
+              <ValueStackItem
+                key={i}
+                label={stripLeadingDash(item.label)}
+                value={priceNum ? `~${offer.price?.replace(/[\d,]+/, String(Math.round(priceNum * item.mult)))} value` : "included"}
+              />
+            ))}
+            {totalValue && priceNum ? (
+              <div className="value-stack__total">
+                <span>Total value</span>
+                <span>{offer.price?.replace(/[\d,]+/, String(totalValue))}+</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Bonuses */}
+      {Array.isArray(offer.bonuses) && offer.bonuses.length ? (
+        <div className="offer-gso__section">
+          <div className="offer-gso__section-label">Bonuses included</div>
+          <div className="offer-gso__bonuses">
+            {offer.bonuses.map((bonus, i) => (
+              <div key={i} className="offer-gso__bonus-item">
+                <span className="offer-gso__bonus-num">0{i + 1}</span>
+                <span>{stripLeadingDash(bonus)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Guarantee */}
+      {offer.guarantee ? (
+        <div className="offer-gso__guarantee">
+          <div className="offer-gso__guarantee-badge">🛡</div>
+          <div>
+            <div className="offer-gso__guarantee-title">The Guarantee</div>
+            <div className="offer-gso__guarantee-text">{stripLeadingDash(offer.guarantee)}</div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Price anchoring */}
+      <div className="offer-gso__pricing">
+        <div className="offer-gso__anchor">{stripLeadingDash(offer.price_anchor)}</div>
+        <div className="offer-gso__price-row">
+          <span className="offer-gso__price-label">Your investment</span>
+          <span className="offer-gso__price">{offer.price}</span>
+        </div>
+      </div>
+
+      {/* Urgency */}
+      {offer.urgency ? (
+        <div className="offer-gso__urgency">
+          <span className="offer-gso__urgency-icon">⏳</span>
+          {stripLeadingDash(offer.urgency)}
+        </div>
+      ) : null}
+
+      {/* CTA */}
+      <div className="offer-gso__cta-block">
+        <div className="offer-gso__cta-text">→ {stripLeadingDash(offer.cta)}</div>
+        {offer.competitor_gap ? (
+          <div className="offer-gso__gap">{stripLeadingDash(offer.competitor_gap)}</div>
+        ) : null}
+      </div>
+
+      {/* Eval scores — collapsed by default */}
       {evaluation ? (
-        <section className="structured-section">
-          <h3>Eval</h3>
+        <CollapsibleSection title="Eval scores" defaultOpen={false}>
           <DataRow label="Research score" value={evaluation.research?.score?.toString()} />
           <DataRow label="Research action" value={evaluation.research?.action} />
           <DataRow label="Offer score" value={evaluation.offer?.score?.toString()} />
           <DataRow label="Offer action" value={evaluation.offer?.action} />
-        </section>
-      ) : null}
-
-      <section className="structured-section">
-        <h3>ICP</h3>
-        <EditableField label="Who" value={offer.icp?.who} multiline />
-        <EditableField label="Pain" value={offer.icp?.pain} multiline />
-        <EditableField label="Trigger" value={offer.icp?.trigger} multiline />
-        <EditableField label="Evidence" value={offer.icp?.evidence_source} multiline />
-      </section>
-
-      <section className="structured-section">
-        <h3>Positioning</h3>
-        <EditableField label="Headline" value={offer.headline} multiline />
-        <EditableField label="Subheadline" value={offer.subheadline} multiline />
-        <EditableField label="Outcome" value={offer.outcome} multiline />
-        <EditableField label="Price" value={offer.price} />
-        <EditableField label="Price anchor" value={offer.price_anchor} multiline />
-        <EditableField label="Guarantee" value={offer.guarantee} multiline />
-        <EditableField label="Urgency" value={offer.urgency} multiline />
-        <EditableField label="CTA" value={offer.cta} multiline />
-        <EditableField label="Competitor gap" value={offer.competitor_gap} multiline />
-      </section>
-
-      {Array.isArray(offer.bonuses) && offer.bonuses.length ? (
-        <section className="structured-section">
-          <h3>Bonuses</h3>
-          <ul className="structured-list">
-            {offer.bonuses.map((bonus) => (
-              <li key={bonus}><span>{bonus}</span></li>
-            ))}
-          </ul>
-        </section>
+        </CollapsibleSection>
       ) : null}
     </div>
   );
