@@ -1,40 +1,6 @@
 import { useState } from "react";
 import { exportPackageAsText, downloadTextFile } from "../lib/exportPackage";
 
-function renderMarkdown(text) {
-  if (!text) return null;
-  const lines = text.split("\n");
-  const elements = [];
-  let key = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (/^### (.+)/.test(line)) {
-      elements.push(<h3 key={key++} className="critique-h3">{line.replace(/^### /, "")}</h3>);
-    } else if (/^## (.+)/.test(line)) {
-      elements.push(<h2 key={key++} className="critique-h2">{line.replace(/^## /, "")}</h2>);
-    } else if (/^# (.+)/.test(line)) {
-      elements.push(<h1 key={key++} className="critique-h1">{line.replace(/^# /, "")}</h1>);
-    } else if (/^---+$/.test(line.trim())) {
-      elements.push(<hr key={key++} className="critique-hr" />);
-    } else if (line.trim() === "") {
-      elements.push(<div key={key++} className="critique-spacer" />);
-    } else {
-      // Inline: **bold**, *italic*, `code`
-      const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
-      const inline = parts.map((part, j) => {
-        if (/^\*\*(.+)\*\*$/.test(part)) return <strong key={j}>{part.slice(2, -2)}</strong>;
-        if (/^\*(.+)\*$/.test(part)) return <em key={j}>{part.slice(1, -1)}</em>;
-        if (/^`(.+)`$/.test(part)) return <code key={j} className="critique-code">{part.slice(1, -1)}</code>;
-        return part;
-      });
-      elements.push(<p key={key++} className="critique-p">{inline}</p>);
-    }
-  }
-  return elements;
-}
-
 function CopyButton({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
 
