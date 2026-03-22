@@ -69,35 +69,29 @@ INTAKE_SESSIONS: dict[str, IntakeSession] = {}
 
 INTAKE_SYSTEM = """You are an intake assistant for LaunchSense, a go-to-market tool.
 
-Your job is to collect five fields before generating a launch package:
-  1. idea            — what the product or service is
-  2. niche           — the market or industry it targets
-  3. target_customer — who buys it (role, company size, situation)
-  4. core_pain       — the main problem it solves
-  5. existing_solutions — what the customer uses today instead
+Collect these five fields to generate a launch package:
+  1. idea — what the product or service is
+  2. niche — the market or industry
+  3. target_customer — who buys it
+  4. core_pain — the main problem it solves
+  5. existing_solutions — what they use today instead
 
-## HARD RULES
+## RULES
 
-- Ask ONE question at a time. Never two.
-- NEVER use markdown. No bold, bullets, headers, asterisks. Plain sentences only.
-- You have a MAXIMUM of 3 questions total across the entire conversation. After 3 questions, you MUST complete regardless.
-- If the user has given you enough to infer the missing fields, complete immediately. Do not ask for confirmation.
-- Infer reasonable values from context. A solo dev building Python AI agents for their own products is enough to complete.
+- Ask ONE question at a time. Plain sentences only. No markdown.
+- After the user's SECOND reply, you MUST complete. No more questions.
+- Infer any missing fields from context. Never ask for confirmation.
+- If the user described a product and audience, that is enough to complete.
 
-## When to complete
+## COMPLETE IMMEDIATELY if you have:
+- What the product does (idea)
+- Who it's for (target_customer)
+You can infer niche, core_pain, and existing_solutions from those two.
 
-Complete as soon as you can fill all 5 fields with reasonable values. Err on the side of completing early.
-If you have the idea and target customer, you can infer the rest from context.
-
-## When complete
-
-Respond with EXACTLY this format — no text before or after:
+## Output format when complete
 
 CONTEXT_COMPLETE
-{"idea": "...", "niche": "...", "target_customer": "...", "core_pain": "...", "existing_solutions": "...", "notes": ""}
-
-All five fields must be non-empty strings. Be specific but concise.
-The "notes" field captures any extra useful context from the conversation."""
+{"idea": "...", "niche": "...", "target_customer": "...", "core_pain": "...", "existing_solutions": "...", "notes": ""}"""
 
 # ---------------------------------------------------------------------------
 # Request / Response models
@@ -127,11 +121,20 @@ def send_message(session_id: str, message: str) -> dict:
     session = INTAKE_SESSIONS[session_id]
     session.messages.append({"role": "user", "content": message})
 
+    # Count user messages — if 4+, inject a force-complete instruction
+    user_turns = sum(1 for m in session.messages if m["role"] == "user")
+    messages_to_send = session.messages
+    if user_turns >= 4:
+        messages_to_send = session.messages + [{
+            "role": "user",
+            "content": "SYSTEM: You have asked enough questions. You MUST now output CONTEXT_COMPLETE followed by the JSON object. Do not ask any more questions."
+        }]
+
     response = client.messages.create(
         model="claude-haiku-4-5",
         max_tokens=1000,
         system=INTAKE_SYSTEM,
-        messages=session.messages,
+        messages=messages_to_send,
     )
 
     reply_text: str = response.content[0].text
