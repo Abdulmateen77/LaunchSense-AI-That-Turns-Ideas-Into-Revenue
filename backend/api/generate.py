@@ -77,13 +77,6 @@ async def generate_stream(request: GenerateRequest):
 
     ka_task = asyncio.create_task(keepalive())
 
-    async def with_keepalive(coro):
-        """Drain any pending keepalive pings before/after awaiting a coroutine."""
-        result = await coro
-        while not keepalive_queue.empty():
-            yield keepalive_queue.get_nowait()
-        return result
-
     async def flush_pings():
         while not keepalive_queue.empty():
             yield keepalive_queue.get_nowait()
