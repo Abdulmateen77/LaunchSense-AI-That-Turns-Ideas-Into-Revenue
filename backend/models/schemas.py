@@ -65,7 +65,7 @@ class Offer(BaseModel):
     sources_used: list[str] = Field(default_factory=list, max_length=10)
 
 
-# --- LandingPage sub-models and LandingPage ---
+# --- LandingPage ---
 
 class LandingPageHero(BaseModel):
     headline: str = Field(min_length=1)
@@ -73,44 +73,36 @@ class LandingPageHero(BaseModel):
     cta: str = Field(min_length=1)
     cta_sub: str = Field(min_length=1)
 
-
 class ProblemPoint(BaseModel):
     pain: str = Field(min_length=1)
     stat: str = Field(min_length=1)
     source: str = Field(min_length=1)
 
-
 class LandingPageProblem(BaseModel):
     headline: str = Field(min_length=1)
     points: list[ProblemPoint] = Field(default_factory=list, max_length=3)
-
 
 class SolutionBenefit(BaseModel):
     title: str = Field(min_length=1)
     body: str = Field(min_length=1)
 
-
 class LandingPageSolution(BaseModel):
     headline: str = Field(min_length=1)
-    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=4)
-
+    benefits: list[SolutionBenefit] = Field(default_factory=list, max_length=3)
 
 class VsSection(BaseModel):
     headline: str = Field(min_length=1)
     us: list[str] = Field(default_factory=list, max_length=6)
     them: list[str] = Field(default_factory=list, max_length=6)
 
-
 class LandingPagePricing(BaseModel):
     price: str = Field(min_length=1)
     anchor: str = Field(min_length=1)
     guarantee: str = Field(min_length=1)
 
-
 class LandingPageSource(BaseModel):
     label: str = Field(min_length=1)
     url: str = Field(min_length=1)
-
 
 class LandingPage(BaseModel):
     slug: str = Field(min_length=1)

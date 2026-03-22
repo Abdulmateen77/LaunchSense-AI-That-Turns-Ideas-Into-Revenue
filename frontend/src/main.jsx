@@ -1,25 +1,28 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { CivicAuthProvider } from "@civic/auth/react";
 import App from "./App";
 import TestDashboardApp from "./TestDashboardApp";
+import PreviewPage from "./components/PreviewPage";
 import "./styles.css";
 
-const CIVIC_CLIENT_ID = import.meta.env.VITE_CIVIC_CLIENT_ID || "";
+function getPreviewSlug() {
+  const match = window.location.pathname.match(/^\/preview\/(.+)$/);
+  return match ? match[1] : null;
+}
 
 function shouldRenderTestDashboard() {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
   const params = new URLSearchParams(window.location.search);
   return params.get("view") === "tests";
 }
 
+const previewSlug = getPreviewSlug();
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <CivicAuthProvider clientId={CIVIC_CLIENT_ID}>
-      {shouldRenderTestDashboard() ? <TestDashboardApp /> : <App />}
-    </CivicAuthProvider>
+    {previewSlug
+      ? <PreviewPage slug={previewSlug} />
+      : shouldRenderTestDashboard()
+        ? <TestDashboardApp />
+        : <App />}
   </React.StrictMode>
 );

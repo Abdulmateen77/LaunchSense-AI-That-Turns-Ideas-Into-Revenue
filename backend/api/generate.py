@@ -210,3 +210,17 @@ async def get_offer(slug: str):
     if slug not in OFFER_STORE:
         raise HTTPException(status_code=404, detail="Offer not found")
     return OFFER_STORE[slug]
+
+
+# ---------------------------------------------------------------------------
+# Preview store — for test_builder.py
+# ---------------------------------------------------------------------------
+
+PREVIEW_STORE: dict[str, dict] = {}
+
+
+@router.post("/api/preview")
+async def store_preview(payload: dict):
+    slug = payload.get("slug", "preview")
+    PREVIEW_STORE[slug] = payload
+    return {"slug": slug, "url": f"http://localhost:5173/preview/{slug}"}

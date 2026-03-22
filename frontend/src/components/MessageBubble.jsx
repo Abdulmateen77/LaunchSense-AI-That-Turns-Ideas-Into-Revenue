@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { exportPackageAsText, downloadTextFile } from "../lib/exportPackage";
+import LandingPageCard from "./LandingPageCard";
 
 function CopyButton({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
@@ -23,7 +24,8 @@ function CopyButton({ text, label = "Copy" }) {
   );
 }
 
-function CollapsibleSection({ title, children, copyText = null, defaultOpen = true }) {  const [open, setOpen] = useState(defaultOpen);
+function CollapsibleSection({ title, children, copyText = null, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <section className="structured-section">
@@ -53,14 +55,12 @@ function renderMarkdown(text) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Horizontal rule
     if (/^---+$/.test(line.trim())) {
       elements.push(<hr key={i} className="md-hr" />);
       i++;
       continue;
     }
 
-    // Headings
     const h3 = line.match(/^###\s+(.*)/);
     const h2 = line.match(/^##\s+(.*)/);
     const h1 = line.match(/^#\s+(.*)/);
@@ -68,7 +68,6 @@ function renderMarkdown(text) {
     if (h2) { elements.push(<h2 key={i} className="md-h2">{inlineFormat(h2[1])}</h2>); i++; continue; }
     if (h1) { elements.push(<h1 key={i} className="md-h1">{inlineFormat(h1[1])}</h1>); i++; continue; }
 
-    // Bullet list — collect consecutive items
     if (/^[-*]\s/.test(line)) {
       const items = [];
       while (i < lines.length && /^[-*]\s/.test(lines[i])) {
@@ -79,7 +78,6 @@ function renderMarkdown(text) {
       continue;
     }
 
-    // Numbered list
     if (/^\d+\.\s/.test(line)) {
       const items = [];
       while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
@@ -90,10 +88,8 @@ function renderMarkdown(text) {
       continue;
     }
 
-    // Empty line — skip
     if (!line.trim()) { i++; continue; }
 
-    // Paragraph
     elements.push(<p key={i} className="md-p">{inlineFormat(line)}</p>);
     i++;
   }
@@ -102,7 +98,6 @@ function renderMarkdown(text) {
 }
 
 function inlineFormat(text) {
-  // Split on **bold** and *italic* markers
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return parts.map((part, idx) => {
     if (part.startsWith("**") && part.endsWith("**"))
@@ -114,10 +109,7 @@ function inlineFormat(text) {
 }
 
 function DataRow({ label, value, multiline = false }) {
-  if (!value) {
-    return null;
-  }
-
+  if (!value) return null;
   return (
     <div className="data-row">
       <span className="data-row__label">{label}</span>
@@ -127,10 +119,7 @@ function DataRow({ label, value, multiline = false }) {
 }
 
 function LinkRow({ label, href }) {
-  if (!href) {
-    return null;
-  }
-
+  if (!href) return null;
   return (
     <div className="data-row">
       <span className="data-row__label">{label}</span>
@@ -143,10 +132,7 @@ function LinkRow({ label, href }) {
 
 function renderContextCard(message) {
   const context = message.data?.context;
-
-  if (!context) {
-    return null;
-  }
+  if (!context) return null;
 
   return (
     <div className="structured-card">
@@ -369,12 +355,15 @@ function ExportButton({ offer, growth, page, critique }) {
   );
 }
 
-function renderAssetsCard(message) {
+function renderAssetsCard(message, storedPackage) {
   const page = message.data?.page;
   const growth = message.data?.growth;
   const offer = message.data?.offer;
   const critique = message.data?.critique;
   const shareUrl = page?.absoluteUrl || (page?.url ? `${window.location.origin}${page.url}` : null);
+
+  const landingPage = storedPackage?.landing_page;
+  const slug = page?.slug || storedPackage?.slug;
 
   return (
     <div className="structured-card">
@@ -386,11 +375,19 @@ function renderAssetsCard(message) {
         </div>
       </div>
 
-      {page ? (
-        <CollapsibleSection title="Landing Page">
+      {landingPage && slug ? (
+        <section className="structured-section">
+          <h3>Landing Page</h3>
+          <div style={{ marginTop: 12 }}>
+            <LandingPageCard page={landingPage} slug={slug} />
+          </div>
+        </section>
+      ) : page ? (
+        <section className="structured-section">
+          <h3>Landing Page</h3>
           <DataRow label="Slug" value={page.slug} />
-          <LinkRow label="Stored package URL" href={page.absoluteUrl || page.url} />
-        </CollapsibleSection>
+          <LinkRow label="URL" href={page.absoluteUrl || page.url} />
+        </section>
       ) : null}
 
       {growth?.channel ? (
@@ -446,7 +443,7 @@ function renderAssetsCard(message) {
   );
 }
 
-function renderMessageContent(message, canStartGeneration, onStartGeneration) {
+function renderMessageContent(message, onStartGeneration, storedPackage) {
   switch (message.kind) {
     case "context":
       return renderContextCard(message);
@@ -455,9 +452,8 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
     case "offer":
       return <OfferCard message={message} onStartGeneration={onStartGeneration} />;
     case "assets":
-      return renderAssetsCard(message);
+      return renderAssetsCard(message, storedPackage);
     case "validation":
-      // ValidationCard is rendered directly in MessageList with callbacks — skip here
       return null;
     case "status":
       return (
@@ -467,10 +463,10 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
       );
     case "critique":
       return (
-        <div className="critique-card">
+        <>
           <p className="message-card__eyebrow">Critique</p>
-          <div className="md-body">{renderMarkdown(message.text)}</div>
-        </div>
+          <p className="message-card__text">{message.text}</p>
+        </>
       );
     case "error":
       return (
@@ -484,40 +480,29 @@ function renderMessageContent(message, canStartGeneration, onStartGeneration) {
   }
 }
 
-export function MessageBubble({ message, canStartGeneration, onStartGeneration }) {
+export function MessageBubble({ message, onStartGeneration, storedPackage }) {
   const isUser = message.role === "user";
   const isSystem = message.role === "system";
   const avatarLabel = isUser ? "U" : isSystem ? "SYS" : "AI";
 
-  // validation kind is rendered by MessageList directly — skip entirely here
   if (message.kind === "validation") return null;
 
   return (
     <article className={`message-row ${isUser ? "message-row--user" : ""}`}>
-      <div
-        className={`message-avatar ${
-          isUser
-            ? "message-avatar--user"
-            : isSystem
-              ? "message-avatar--system"
-              : "message-avatar--assistant"
-        }`}
-      >
+      <div className={`message-avatar ${
+        isUser ? "message-avatar--user"
+        : isSystem ? "message-avatar--system"
+        : "message-avatar--assistant"
+      }`}>
         {avatarLabel}
       </div>
-
-      <div
-        className={`message-card ${
-          isUser
-            ? "message-card--user"
-            : message.kind === "error"
-              ? "message-card--error"
-              : message.kind === "status"
-                ? "message-card--status"
-                : "message-card--assistant"
-        }`}
-      >
-        {renderMessageContent(message, canStartGeneration, onStartGeneration)}
+      <div className={`message-card ${
+        isUser ? "message-card--user"
+        : message.kind === "error" ? "message-card--error"
+        : message.kind === "status" ? "message-card--status"
+        : "message-card--assistant"
+      }`}>
+        {renderMessageContent(message, onStartGeneration, storedPackage)}
       </div>
     </article>
   );
