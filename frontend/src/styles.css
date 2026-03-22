@@ -2110,3 +2110,17 @@ textarea {
   color: var(--muted-strong);
   line-height: 1.55;
 }
+
+/* Critique markdown rendering */
+.critique-body {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.critique-h1 { font-size: 1.1rem; font-weight: 700; margin: 1.2rem 0 0.4rem; color: var(--text); }
+.critique-h2 { font-size: 1rem; font-weight: 700; margin: 1.2rem 0 0.4rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.25rem; }
+.critique-h3 { font-size: 0.9rem; font-weight: 600; margin: 1rem 0 0.3rem; color: var(--text); }
+.critique-p { margin: 0.4rem 0; }
+.critique-hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+.critique-spacer { height: 0.4rem; }
+.critique-code { background: var(--surface-2, #2a2a2a); padding: 0.1em 0.35em; border-radius: 3px; font-family: monospace; font-size: 0.85em; }
