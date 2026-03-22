@@ -245,6 +245,12 @@ textarea {
   display: grid;
   gap: 0.28rem;
   min-width: 0;
+  flex: 1;
+}
+
+.chat-header__auth {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .chat-header__meta {
@@ -464,6 +470,20 @@ textarea {
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.message-card__text--status {
+  color: var(--muted-strong);
+  font-size: 0.88rem;
+}
+
+.status-spinner {
+  font-style: normal;
+}
+
+.text-muted {
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
 .message-card__eyebrow {
@@ -916,6 +936,15 @@ textarea {
     transform: translateX(-100%);
   }
 
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 9;
+    backdrop-filter: blur(2px);
+  }
+
   .welcome-grid {
     grid-template-columns: 1fr;
   }
@@ -941,6 +970,22 @@ textarea {
   .chat-header__status {
     width: 100%;
     white-space: normal;
+  }
+
+  /* Progress bar wraps on mobile */
+  .gen-progress {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .gen-progress__line {
+    display: none;
+  }
+
+  .gen-progress__step {
+    flex-direction: row;
+    flex: unset;
+    gap: 0.4rem;
   }
 }
 
@@ -1157,3 +1202,301 @@ textarea {
 .md-ul li, .md-ol li { margin: 0.25rem 0; }
 .md-hr { border: none; border-top: 1px solid var(--line); margin: 0.8rem 0; }
 .critique-card { width: 100%; }
+
+/* ── Copy button ─────────────────────────────────────────────── */
+
+.structured-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.structured-section__header h3 {
+  margin: 0;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-strong);
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.copy-btn:hover {
+  background: var(--hover);
+}
+
+.copy-btn--copied {
+  color: #166534;
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+}
+
+/* ── Collapsible sections ────────────────────────────────────── */
+
+.collapsible-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+}
+
+.collapsible-toggle h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.collapsible-toggle__chevron {
+  font-size: 0.7rem;
+  color: var(--muted);
+  transition: transform 150ms ease;
+  display: inline-block;
+}
+
+.collapsible-toggle__chevron--open {
+  transform: rotate(90deg);
+}
+
+.collapsible-body {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+/* ── Generation progress bar ─────────────────────────────────── */
+
+.gen-progress {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.25rem 0;
+  width: 100%;
+}
+
+.gen-progress__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  gap: 0.4rem;
+}
+
+.gen-progress__dot {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  border: 2px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+.gen-progress__step--done .gen-progress__dot {
+  background: #166534;
+  border-color: #166534;
+  color: #ffffff;
+}
+
+.gen-progress__step--active .gen-progress__dot {
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+.gen-progress__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.gen-progress__step--active .gen-progress__label {
+  color: var(--text);
+}
+
+.gen-progress__step--done .gen-progress__label {
+  color: #166534;
+}
+
+.gen-progress__line {
+  position: absolute;
+  top: 0.875rem;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line-strong);
+  z-index: 0;
+}
+
+.gen-progress__step--done .gen-progress__line {
+  background: #166534;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Backdrop only exists on mobile */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* ── Welcome panel enhancements ─────────────────────────────── */
+
+.welcome-panel__try {
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.welcome-card__cta {
+  margin-top: 0.2rem;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.welcome-card:hover .welcome-card__cta {
+  opacity: 1;
+}
+
+/* ── Assets card header + export button ─────────────────────── */
+
+.assets-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.assets-card__header .message-card__eyebrow {
+  margin: 0;
+}
+
+.assets-card__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.export-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-strong);
+  background: var(--panel-muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.export-btn:hover {
+  background: var(--hover);
+  border-color: var(--line-strong);
+}
+
+/* ── Offer card inline editing ───────────────────────────────── */
+
+.offer-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.offer-card__header .message-card__eyebrow {
+  margin: 0;
+}
+
+.regen-btn {
+  flex-shrink: 0;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.regen-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.data-row__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.edit-btn {
+  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  transition: color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.data-row--editable:hover .edit-btn,
+.data-row--editing .edit-btn {
+  opacity: 1;
+}
+
+.edit-btn:hover {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--panel-muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 0.5rem;
+  resize: vertical;
+  outline: none;
+}
+
+.edit-textarea:focus {
+  border-color: #93c5fd;
+  background: #ffffff;
+}

@@ -1,11 +1,12 @@
 import json
 import os
+import re
 import uuid
 from dataclasses import dataclass, field
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from models.schemas import EnrichedContext
@@ -19,6 +20,35 @@ if not ANTHROPIC_API_KEY:
 client = Anthropic()
 
 router = APIRouter()
+
+# ---------------------------------------------------------------------------
+# Content moderation
+# ---------------------------------------------------------------------------
+
+# Fast keyword blocklist — checked before any LLM call
+_BLOCKED_PATTERNS = re.compile(
+    r"\b("
+    r"porn|pornograph|explicit|nude|naked|sex(ual)?|nsfw|erotic|fetish|"
+    r"onlyfans|escort|prostitut|traffick|"
+    r"weapon|bomb|explosive|firearm|gun|ammo|ammunition|"
+    r"drug|cocaine|heroin|meth|fentanyl|narco|"
+    r"hack|malware|ransomware|phish|ddos|exploit|"
+    r"murder|kill|assassin|terror|jihadist|"
+    r"child.?abuse|csam|pedophil"
+    r")\b",
+    re.IGNORECASE,
+)
+
+MODERATION_REFUSAL = (
+    "This platform is for business launch planning only. "
+    "I can't help with that kind of request."
+)
+
+
+def is_policy_violation(text: str) -> bool:
+    """Fast keyword check. Returns True if the message should be blocked."""
+    return bool(_BLOCKED_PATTERNS.search(text))
+
 
 # ---------------------------------------------------------------------------
 # Session dataclass
@@ -149,6 +179,13 @@ def send_message(session_id: str, message: str) -> dict:
 
 @router.post("/message")
 async def intake_message(body: IntakeMessageRequest) -> IntakeMessageResponse:
+    # Content moderation — block before any LLM call or session creation
+    if is_policy_violation(body.message):
+        raise HTTPException(
+            status_code=400,
+            detail=MODERATION_REFUSAL,
+        )
+
     session_id = body.session_id
     if session_id is None or session_id not in INTAKE_SESSIONS:
         session_id = str(uuid.uuid4())

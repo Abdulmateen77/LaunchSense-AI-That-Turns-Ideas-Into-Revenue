@@ -23,6 +23,7 @@ export const chatActionTypes = Object.freeze({
   LOCAL_THREAD_NOTE_ADDED: "LOCAL_THREAD_NOTE_ADDED",
   INTAKE_REQUEST_STARTED: "INTAKE_REQUEST_STARTED",
   INTAKE_RESPONSE_RECEIVED: "INTAKE_RESPONSE_RECEIVED",
+  INTAKE_SOFT_ERROR: "INTAKE_SOFT_ERROR",
   VALIDATION_STARTED: "VALIDATION_STARTED",
   VALIDATION_RECEIVED: "VALIDATION_RECEIVED",
   VALIDATION_SKIPPED: "VALIDATION_SKIPPED",
@@ -536,6 +537,21 @@ export function chatReducer(state, action) {
         };
       });
 
+    case chatActionTypes.INTAKE_SOFT_ERROR:
+      return updateThread(state, action.threadId, (thread) => ({
+        ...thread,
+        busy: false,
+        // Phase stays as-is — user can keep typing
+        messages: [
+          ...thread.messages,
+          createMessage({
+            role: "system",
+            kind: "error",
+            text: action.errorMessage
+          })
+        ]
+      }));
+
     case chatActionTypes.VALIDATION_STARTED:
       return updateThread(state, action.threadId, (thread) => ({
         ...thread,
@@ -716,7 +732,9 @@ export function chatReducer(state, action) {
                 kind: "assets",
                 data: {
                   page: thread.results.page,
-                  growth: action.data
+                  growth: action.data,
+                  offer: thread.results.offer,
+                  critique: thread.results.critique || ""
                 }
               })
             ];

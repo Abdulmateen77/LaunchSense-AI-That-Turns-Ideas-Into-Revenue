@@ -116,32 +116,35 @@ async def generate_stream(request: GenerateRequest):
         yield emit("offer", offer.model_dump())
 
         # ------------------------------------------------------------------
-        # Step 2 — Builder + Growth (conditional based on asset selection)
+        # Step 2 — Builder + Growth (parallel, failures isolated)
         # ------------------------------------------------------------------
         selected_assets = set(request.assets or ["landing_page", "cold_email", "linkedin_dm", "hooks"])
-        
-        yield emit("status", {"step": 2, "label": "Building selected assets..."})
+
+        yield emit("status", {"step": 2, "label": "Building page and outreach..."})
+
+        want_page = "landing_page" in selected_assets
+        want_growth = any(a in selected_assets for a in ["cold_email", "linkedin_dm", "hooks"])
+
+        builder_coro = run_builder_agent(offer, evidence, model=models.builder if models else None) if want_page else asyncio.sleep(0)
+        growth_coro = run_growth_agent(offer, evidence, model=models.growth if models else None) if want_growth else asyncio.sleep(0)
+
+        # return_exceptions=True so one failure doesn't kill the other
+        page_result, growth_result = await asyncio.gather(builder_coro, growth_coro, return_exceptions=True)
 
         landing_page = None
         growth_pack = None
 
-        tasks = []
-        if "landing_page" in selected_assets:
-            tasks.append(run_builder_agent(offer, evidence, model=models.builder if models else None))
-        else:
-            tasks.append(asyncio.sleep(0))  # placeholder
+        if want_page:
+            if isinstance(page_result, Exception):
+                print(f"Agent 2 (builder) failed: {page_result}")
+            else:
+                landing_page = page_result
 
-        if any(asset in selected_assets for asset in ["cold_email", "linkedin_dm", "hooks"]):
-            tasks.append(run_growth_agent(offer, evidence, model=models.growth if models else None))
-        else:
-            tasks.append(asyncio.sleep(0))  # placeholder
-
-        results = await asyncio.gather(*tasks)
-        
-        if "landing_page" in selected_assets:
-            landing_page = results[0]
-        if any(asset in selected_assets for asset in ["cold_email", "linkedin_dm", "hooks"]):
-            growth_pack = results[1]
+        if want_growth:
+            if isinstance(growth_result, Exception):
+                print(f"Agent 3 (growth) failed: {growth_result}")
+            else:
+                growth_pack = growth_result
 
         slug = slug_from_idea(request.idea)
 

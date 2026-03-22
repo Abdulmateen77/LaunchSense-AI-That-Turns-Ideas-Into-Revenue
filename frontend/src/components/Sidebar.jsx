@@ -20,9 +20,15 @@ function NewChatIcon() {
   );
 }
 
-export function Sidebar({ threads, activeThreadId, isCollapsed, onSelectThread, onNewChat }) {
+export function Sidebar({ threads, activeThreadId, isCollapsed, onSelectThread, onNewChat, onClose }) {
   return (
-    <aside className={`sidebar ${isCollapsed ? "sidebar--collapsed" : ""}`}>
+    <>
+      {/* Backdrop — mobile only, dismisses sidebar on tap */}
+      {!isCollapsed ? (
+        <div className="sidebar-backdrop" aria-hidden="true" onClick={onClose} />
+      ) : null}
+
+      <aside className={`sidebar ${isCollapsed ? "sidebar--collapsed" : ""}`}>
       <div className="sidebar__brand">
         <LogoMark />
         {!isCollapsed ? <span className="sidebar__brand-label">Launch Sense</span> : null}
@@ -61,6 +67,7 @@ export function Sidebar({ threads, activeThreadId, isCollapsed, onSelectThread, 
           );
         })}
       </nav>
-    </aside>
+      </aside>
+    </>
   );
 }

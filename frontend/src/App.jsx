@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useRef } from "react";
+import { useUser } from "@civic/auth/react";
 import { Sidebar } from "./components/Sidebar";
 import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
@@ -57,6 +58,7 @@ export default function App() {
   const [state, dispatch] = useReducer(chatReducer, undefined, createInitialState);
   const generationControllersRef = useRef(new Map());
   const activeThread = selectActiveThread(state);
+  const { user, signIn } = useUser();
 
   useEffect(() => {
     let cancelled = false;
@@ -151,6 +153,12 @@ export default function App() {
       return false;
     }
 
+    // Soft gate — prompt sign-in before first message
+    if (!user) {
+      await signIn();
+      return false;
+    }
+
     if (activeThread.phase === THREAD_MODES.COMPLETE) {
       dispatch({
         type: chatActionTypes.LOCAL_THREAD_NOTE_ADDED,
@@ -209,6 +217,16 @@ export default function App() {
       }
     } catch (error) {
       const errorMessage = formatError(error);
+
+      // Content policy violation — show inline, keep thread alive
+      if (errorMessage.includes("This platform is for business launch planning only")) {
+        dispatch({
+          type: chatActionTypes.INTAKE_SOFT_ERROR,
+          threadId,
+          errorMessage
+        });
+        return true;
+      }
 
       if (isConnectionFailure(errorMessage)) {
         dispatch({
@@ -384,6 +402,7 @@ export default function App() {
         isCollapsed={state.isSidebarCollapsed}
         onSelectThread={handleSelectThread}
         onNewChat={handleNewChat}
+        onClose={() => dispatch({ type: chatActionTypes.SET_SIDEBAR_COLLAPSED, value: true })}
       />
 
       <main className="chat-shell">
@@ -405,6 +424,8 @@ export default function App() {
             <MessageList
               messages={activeThread.messages}
               isBusy={activeThread.busy}
+              phase={activeThread.phase}
+              stage={activeThread.stage}
               canStartGeneration={canStartGeneration(activeThread)}
               onStartGeneration={() => startGeneration(activeThread.id)}
               onConfirmValidation={handleConfirmValidation}

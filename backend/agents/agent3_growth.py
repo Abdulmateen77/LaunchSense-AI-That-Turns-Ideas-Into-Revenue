@@ -41,7 +41,14 @@ Your job is to generate cold outreach assets grounded in real market evidence.
    - Do not mention your product or service directly
    - Open a conversation, not a sale
 
-4. HOOKS
+4. LUFFA DM
+   - Must be under 120 words
+   - Luffa is a Web3-native encrypted messaging platform — assume the recipient is crypto/Web3 aware
+   - Lead with a specific insight or stat relevant to their world
+   - No pitch — open a thread, not a sale
+   - Tone: peer-to-peer, direct, no corporate language
+
+5. HOOKS
    - Generate exactly 3 hooks for different platforms
    - Platforms: LinkedIn, Twitter/X, cold email subject line
    - Each hook must have: platform, hook text, angle, evidence_basis
@@ -58,12 +65,16 @@ The JSON must exactly match the GrowthPack schema provided in the user message."
 
 def parse_llm_json(text: str) -> dict:
     clean = text.strip()
+    if not clean:
+        raise ValueError("LLM returned empty response")
     if clean.startswith("```"):
         parts = clean.split("```")
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
     clean = clean.strip()
+    if not clean:
+        raise ValueError("LLM response was only markdown fences with no content")
     decoder = json.JSONDecoder()
     obj, _ = decoder.raw_decode(clean)
     return obj
@@ -97,6 +108,7 @@ async def run_growth_agent(
     "ps": "string — the real pitch goes here"
   },
   "linkedin_dm": "string — under 150 words, no pitch, curiosity only",
+  "luffa_dm": "string — under 120 words, Web3-native tone, peer-to-peer, no pitch",
   "hooks": [
     {
       "platform": "LinkedIn|Twitter/X|cold email subject line",
@@ -135,12 +147,14 @@ Generate cold outreach assets. Rules:
 - Email subject: under 8 words
 - Email body: exactly 3 paragraphs, end with one question
 - LinkedIn DM: under 150 words, no pitch, curiosity only
+- Luffa DM: under 120 words, Web3-native peer-to-peer tone, no pitch, open a thread
 - Exactly 3 hooks for: LinkedIn, Twitter/X, cold email subject line
 - evidence_line and evidence_url must come from the evidence above
 
 Return ONLY valid JSON matching this schema:
 {growth_pack_schema}"""
 
+    text = ""
     try:
         response = client.messages.create(
             model=model_id,
@@ -148,13 +162,19 @@ Return ONLY valid JSON matching this schema:
             system=GROWTH_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
         )
-        text = response.content[0].text
+        text = next(
+            (block.text for block in response.content if hasattr(block, "text")),
+            ""
+        )
+        if not text:
+            raise ValueError(f"Agent 3 got no text block from LLM. Stop reason: {response.stop_reason}")
         parsed = parse_llm_json(text)
         return GrowthPack(**parsed)
 
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"Agent 3 JSON parse failed: {e}")
-        print(f"Raw text: {text[:500]}")
+        if text:
+            print(f"Raw text (first 500 chars): {text[:500]}")
         raise
     except Exception as e:
         print(f"Agent 3 failed: {e}")
