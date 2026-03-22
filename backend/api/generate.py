@@ -123,15 +123,21 @@ async def generate_stream(request: GenerateRequest):
         async for ping in flush_pings(): yield ping
         yield emit("eval", {"research": research_eval.model_dump(), "offer": offer_eval.model_dump()})
 
+        # Regenerate at most once — never loop
         if offer_eval.action == "regenerate_offer":
+            print(f"Offer scored {offer_eval.score:.2f} — regenerating once with weak point hint")
             weak_point = offer_eval.critical_fails[0] if offer_eval.critical_fails else None
-            offer = await run_offer_agent(
-                context,
-                evidence,
-                principles,
-                model=models.offer if models else None,
-                weak_point=weak_point,
-            )
+            yield emit("status", {"step": 1, "label": "Strengthening offer...", "sub": f"Score {offer_eval.score:.0%} — refining"})
+            try:
+                offer = await run_offer_agent(
+                    context,
+                    evidence,
+                    principles,
+                    model=models.offer if models else None,
+                    weak_point=weak_point,
+                )
+            except Exception as e:
+                print(f"Offer regeneration failed: {e} — using original offer")
             async for ping in flush_pings(): yield ping
 
         yield emit("offer", offer.model_dump())

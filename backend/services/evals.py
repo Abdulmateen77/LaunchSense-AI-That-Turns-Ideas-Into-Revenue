@@ -90,6 +90,11 @@ def eval_research(evidence: Evidence) -> EvalResult:
 
 async def eval_offer(offer: Offer, evidence: Evidence) -> EvalResult:
     """Uses Claude Haiku as judge to score offer quality against evidence."""
+    # If evidence is thin, skip eval — low score would be unfair and trigger wasteful regeneration
+    has_evidence = bool(evidence.competitors or evidence.reddit_quotes)
+    if not has_evidence:
+        print("eval_offer: no evidence available — skipping eval, returning continue")
+        return EvalResult(passed=True, score=0.7, critical_fails=[], action="continue")
     evidence_summary = []
 
     for comp in evidence.competitors:
