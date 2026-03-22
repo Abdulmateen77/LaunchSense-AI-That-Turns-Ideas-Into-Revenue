@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { exportPackageAsText, downloadTextFile } from "../lib/exportPackage";
-import LandingPageCard from "./LandingPageCard";
 
 function CopyButton({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
@@ -108,12 +107,18 @@ function inlineFormat(text) {
   });
 }
 
+function stripLeadingDash(val) {
+  if (typeof val !== "string") return val;
+  return val.replace(/^[-–—]\s*/, "");
+}
+
 function DataRow({ label, value, multiline = false }) {
   if (!value) return null;
+  const display = stripLeadingDash(value);
   return (
     <div className="data-row">
       <span className="data-row__label">{label}</span>
-      <span className={`data-row__value ${multiline ? "data-row__value--multiline" : ""}`}>{value}</span>
+      <span className={`data-row__value ${multiline ? "data-row__value--multiline" : ""}`}>{display}</span>
     </div>
   );
 }
@@ -216,7 +221,7 @@ function renderResearchCard(message) {
 
 function EditableField({ label, value, multiline = false }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value || "");
+  const [draft, setDraft] = useState(stripLeadingDash(value || ""));
 
   if (!value && !editing) return null;
 
@@ -355,6 +360,48 @@ function ExportButton({ offer, growth, page, critique }) {
   );
 }
 
+function FacebookAdPreview({ offer, growth }) {
+  const headline = offer?.headline || growth?.hooks?.[0]?.hook || "Your headline here";
+  const body = offer?.subheadline || offer?.outcome || "Your ad body copy goes here.";
+  const cta = offer?.cta || "Learn More";
+  const [copied, setCopied] = useState(false);
+
+  const adText = `${headline}\n\n${body}\n\nCTA: ${cta}`;
+
+  function handleCopy() {
+    navigator.clipboard.writeText(adText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="fb-ad-preview">
+      <div className="fb-ad-preview__header">
+        <div className="fb-ad-preview__avatar">LS</div>
+        <div>
+          <div className="fb-ad-preview__page-name">LaunchSense</div>
+          <div className="fb-ad-preview__meta">Sponsored · <span>🌐</span></div>
+        </div>
+        <button type="button" className="copy-btn" style={{ marginLeft: "auto" }} onClick={handleCopy}>
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+      <p className="fb-ad-preview__body">{stripLeadingDash(body)}</p>
+      <div className="fb-ad-preview__image-placeholder">
+        <span>{stripLeadingDash(headline)}</span>
+      </div>
+      <div className="fb-ad-preview__footer">
+        <div>
+          <div className="fb-ad-preview__domain">launchsense.ai</div>
+          <div className="fb-ad-preview__headline">{stripLeadingDash(headline)}</div>
+        </div>
+        <button type="button" className="fb-ad-preview__cta-btn">{cta}</button>
+      </div>
+    </div>
+  );
+}
+
 function renderAssetsCard(message, storedPackage) {
   const page = message.data?.page;
   const growth = message.data?.growth;
@@ -364,6 +411,9 @@ function renderAssetsCard(message, storedPackage) {
 
   const landingPage = storedPackage?.landing_page;
   const slug = page?.slug || storedPackage?.slug;
+  const liveUrl = slug
+    ? `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"}/p/${slug}`
+    : (page?.absoluteUrl || page?.url || null);
 
   return (
     <div className="structured-card">
@@ -375,12 +425,17 @@ function renderAssetsCard(message, storedPackage) {
         </div>
       </div>
 
-      {landingPage && slug ? (
+      {liveUrl ? (
         <section className="structured-section">
           <h3>Landing Page</h3>
-          <div style={{ marginTop: 12 }}>
-            <LandingPageCard page={landingPage} slug={slug} />
-          </div>
+          <a
+            href={liveUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="view-page-btn"
+          >
+            View landing page →
+          </a>
         </section>
       ) : page ? (
         <section className="structured-section">
@@ -417,9 +472,9 @@ function renderAssetsCard(message, storedPackage) {
         </CollapsibleSection>
       ) : null}
 
-      {growth?.luffa_dm ? (
-        <CollapsibleSection title="Luffa DM" copyText={growth.luffa_dm}>
-          <p className="message-card__pre">{growth.luffa_dm}</p>
+      {(offer || growth) ? (
+        <CollapsibleSection title="Facebook Ad Preview">
+          <FacebookAdPreview offer={offer} growth={growth} />
         </CollapsibleSection>
       ) : null}
 

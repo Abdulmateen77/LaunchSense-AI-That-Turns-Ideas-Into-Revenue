@@ -1675,3 +1675,129 @@ textarea {
   justify-content: center;
   padding-inline: 0;
 }
+
+/* ── View landing page button ────────────────────────────────── */
+
+.view-page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.view-page-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* ── Facebook Ad Preview ─────────────────────────────────────── */
+
+.fb-ad-preview {
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: var(--panel);
+  font-size: 0.88rem;
+}
+
+.fb-ad-preview__header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.fb-ad-preview__avatar {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  background: #1877f2;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.fb-ad-preview__page-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.fb-ad-preview__meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.fb-ad-preview__body {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.fb-ad-preview__image-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 7rem;
+  background: linear-gradient(135deg, #1877f2 0%, #0a4fa8 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  line-height: 1.4;
+}
+
+.fb-ad-preview__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f0f2f5;
+  border-top: 1px solid var(--line);
+}
+
+.fb-ad-preview__domain {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fb-ad-preview__headline {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 0.15rem;
+}
+
+.fb-ad-preview__cta-btn {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  background: #e4e6eb;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.fb-ad-preview__cta-btn:hover {
+  background: #d8dadf;
+}
