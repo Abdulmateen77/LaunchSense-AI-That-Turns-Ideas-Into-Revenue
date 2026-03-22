@@ -7,7 +7,7 @@ import { MessageList } from "./components/MessageList";
 import { Composer } from "./components/Composer";
 import { WelcomePanel } from "./components/WelcomePanel";
 import { buildAbsolutePackageUrl, fetchStoredPackage, getHealth, sendIntakeMessage, validateIdea } from "./lib/api";
-import { loadState, saveState } from "./lib/persist";
+import { loadState, saveState, clearState } from "./lib/persist";
 import {
   canStartGeneration,
   chatActionTypes,
@@ -61,42 +61,22 @@ export default function App() {
   const activeThread = selectActiveThread(state);
   const { user, signIn, signOut, isLoading } = useUser();
 
-  // Hard gate — show login screen until authenticated
-  if (!isLoading && !user) {
-    return <LoginPage />;
-  }
-
   useEffect(() => {
     let cancelled = false;
 
     async function loadHealth() {
       try {
         await getHealth();
-
-        if (!cancelled) {
-          dispatch({
-            type: chatActionTypes.SET_BACKEND_STATUS,
-            payload: { status: "connected" }
-          });
-        }
+        if (!cancelled) dispatch({ type: chatActionTypes.SET_BACKEND_STATUS, payload: { status: "connected" } });
       } catch {
-        if (!cancelled) {
-          dispatch({
-            type: chatActionTypes.SET_BACKEND_STATUS,
-            payload: { status: "unavailable" }
-          });
-        }
+        if (!cancelled) dispatch({ type: chatActionTypes.SET_BACKEND_STATUS, payload: { status: "unavailable" } });
       }
     }
 
     void loadHealth();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  // Persist threads + sidebar state on every change
   useEffect(() => {
     saveState(state);
   }, [state]);
@@ -105,16 +85,27 @@ export default function App() {
     () => () => {
       generationControllersRef.current.forEach(({ controller, timeoutId }) => {
         controller.abort();
-
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
+        if (timeoutId) clearTimeout(timeoutId);
       });
-
       generationControllersRef.current.clear();
     },
     []
   );
+
+  // Hard gate — render login page until auth resolves
+  if (isLoading) {
+    return (
+      <div className="login-shell">
+        <div className="login-card">
+          <p style={{ color: "var(--muted)", fontSize: "0.9rem" }}>Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
 
   function clearGenerationController(threadId) {
     const entry = generationControllersRef.current.get(threadId);
@@ -144,6 +135,7 @@ export default function App() {
   }
 
   function handleLogout() {
+    clearState();
     signOut();
   }
 
