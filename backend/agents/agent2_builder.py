@@ -59,12 +59,16 @@ The JSON must exactly match the LandingPage schema provided in the user message.
 
 def parse_llm_json(text: str) -> dict:
     clean = text.strip()
+    if not clean:
+        raise ValueError("LLM returned empty response")
     if clean.startswith("```"):
         parts = clean.split("```")
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
     clean = clean.strip()
+    if not clean:
+        raise ValueError("LLM response was only markdown fences with no content")
     # Extract just the first complete JSON object to handle trailing content
     decoder = json.JSONDecoder()
     obj, _ = decoder.raw_decode(clean)
@@ -158,6 +162,7 @@ Every problem point must cite a real source URL from the evidence above.
 Return ONLY valid JSON matching this schema:
 {landing_page_schema}"""
 
+    text = ""
     try:
         response = client.messages.create(
             model=model_id,
@@ -165,7 +170,12 @@ Return ONLY valid JSON matching this schema:
             system=BUILDER_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
         )
-        text = response.content[0].text
+        text = next(
+            (block.text for block in response.content if hasattr(block, "text")),
+            ""
+        )
+        if not text:
+            raise ValueError(f"Agent 2 got no text block from LLM. Stop reason: {response.stop_reason}")
         parsed = parse_llm_json(text)
 
         # Truncate lists to schema limits before Pydantic validation
@@ -179,9 +189,10 @@ Return ONLY valid JSON matching this schema:
 
         return LandingPage(**parsed)
 
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"Agent 2 JSON parse failed: {e}")
-        print(f"Raw text: {text[:500]}")
+        if text:
+            print(f"Raw text (first 500 chars): {text[:500]}")
         raise
     except Exception as e:
         print(f"Agent 2 failed: {e}")

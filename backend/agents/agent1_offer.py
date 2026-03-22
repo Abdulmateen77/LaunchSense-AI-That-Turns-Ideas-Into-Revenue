@@ -72,12 +72,16 @@ The JSON must exactly match the schema provided in the user message."""
 
 def parse_llm_json(text: str) -> dict:
     clean = text.strip()
+    if not clean:
+        raise ValueError("LLM returned empty response")
     if clean.startswith("```"):
         parts = clean.split("```")
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
     clean = clean.strip()
+    if not clean:
+        raise ValueError("LLM response was only markdown fences with no content")
     decoder = json.JSONDecoder()
     obj, _ = decoder.raw_decode(clean)
     return obj
@@ -97,20 +101,28 @@ async def run_offer_agent(
     if weak_point:
         user_message += f"\n\nFOCUS: The previous offer was weak on: {weak_point}. Specifically address this in the new offer."
 
+    text = ""
     try:
         response = client.messages.create(
             model=model_id,
-            max_tokens=4000,
+            max_tokens=6000,
             system=OFFER_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
         )
-        text = response.content[0].text
+        # Extract text block — response may contain non-text blocks
+        text = next(
+            (block.text for block in response.content if hasattr(block, "text")),
+            ""
+        )
+        if not text:
+            raise ValueError(f"Agent 1 got no text block from LLM. Stop reason: {response.stop_reason}")
         parsed = parse_llm_json(text)
         return Offer(**parsed)
 
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"Agent 1 JSON parse failed: {e}")
-        print(f"Raw text: {text[:500]}")
+        if text:
+            print(f"Raw text (first 500 chars): {text[:500]}")
         raise
     except Exception as e:
         print(f"Agent 1 failed: {e}")

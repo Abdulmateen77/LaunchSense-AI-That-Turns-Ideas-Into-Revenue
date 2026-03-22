@@ -65,12 +65,16 @@ The JSON must exactly match the GrowthPack schema provided in the user message."
 
 def parse_llm_json(text: str) -> dict:
     clean = text.strip()
+    if not clean:
+        raise ValueError("LLM returned empty response")
     if clean.startswith("```"):
         parts = clean.split("```")
         clean = parts[1] if len(parts) > 1 else parts[0]
         if clean.startswith("json"):
             clean = clean[4:]
     clean = clean.strip()
+    if not clean:
+        raise ValueError("LLM response was only markdown fences with no content")
     decoder = json.JSONDecoder()
     obj, _ = decoder.raw_decode(clean)
     return obj
@@ -150,6 +154,7 @@ Generate cold outreach assets. Rules:
 Return ONLY valid JSON matching this schema:
 {growth_pack_schema}"""
 
+    text = ""
     try:
         response = client.messages.create(
             model=model_id,
@@ -157,13 +162,19 @@ Return ONLY valid JSON matching this schema:
             system=GROWTH_SYSTEM,
             messages=[{"role": "user", "content": user_message}],
         )
-        text = response.content[0].text
+        text = next(
+            (block.text for block in response.content if hasattr(block, "text")),
+            ""
+        )
+        if not text:
+            raise ValueError(f"Agent 3 got no text block from LLM. Stop reason: {response.stop_reason}")
         parsed = parse_llm_json(text)
         return GrowthPack(**parsed)
 
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         print(f"Agent 3 JSON parse failed: {e}")
-        print(f"Raw text: {text[:500]}")
+        if text:
+            print(f"Raw text (first 500 chars): {text[:500]}")
         raise
     except Exception as e:
         print(f"Agent 3 failed: {e}")
