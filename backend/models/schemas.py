@@ -149,8 +149,8 @@ class Channel(BaseModel):
 class GrowthPack(BaseModel):
     cold_email: ColdEmail
     linkedin_dm: str = Field(min_length=1)
-    luffa_dm: str = Field(min_length=1)
-    hooks: list[Hook] = Field(min_length=3, max_length=3)
+    luffa_dm: str = Field(default="", min_length=0)
+    hooks: list[Hook] = Field(default_factory=list, max_length=5)
     channel: Channel
 
 
