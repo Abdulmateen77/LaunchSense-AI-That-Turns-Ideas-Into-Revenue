@@ -1580,3 +1580,98 @@ textarea {
   font-size: 0.78rem;
   line-height: 1.5;
 }
+
+/* ── Sidebar thread delete + logout ─────────────────────────── */
+
+.thread-card {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 0.9rem;
+  background: transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.thread-card--active {
+  background: var(--active);
+  border-color: #dbeafe;
+}
+
+.thread-card:hover {
+  background: var(--hover);
+}
+
+.thread-card--active:hover {
+  background: var(--active);
+}
+
+.thread-card__body {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 0.9rem;
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.thread-card__delete {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.4rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.thread-card:hover .thread-card__delete {
+  opacity: 1;
+}
+
+.thread-card__delete:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.sidebar__logout:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.sidebar__logout--icon {
+  justify-content: center;
+  padding-inline: 0;
+}

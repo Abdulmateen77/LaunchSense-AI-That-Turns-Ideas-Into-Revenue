@@ -20,6 +20,7 @@ export const chatActionTypes = Object.freeze({
   TOGGLE_SIDEBAR: "TOGGLE_SIDEBAR",
   SET_SIDEBAR_COLLAPSED: "SET_SIDEBAR_COLLAPSED",
   CREATE_NEW_CHAT: "CREATE_NEW_CHAT",
+  DELETE_THREAD: "DELETE_THREAD",
   LOCAL_THREAD_NOTE_ADDED: "LOCAL_THREAD_NOTE_ADDED",
   INTAKE_REQUEST_STARTED: "INTAKE_REQUEST_STARTED",
   INTAKE_RESPONSE_RECEIVED: "INTAKE_RESPONSE_RECEIVED",
@@ -433,6 +434,18 @@ export function chatReducer(state, action) {
         threads: [thread, ...state.threads],
         activeThreadId: thread.id
       };
+    }
+
+    case chatActionTypes.DELETE_THREAD: {
+      const remaining = state.threads.filter((t) => t.id !== action.threadId);
+      if (remaining.length === 0) {
+        const fresh = createEmptyThread(1);
+        return { ...state, threads: [fresh], activeThreadId: fresh.id };
+      }
+      const nextActive = state.activeThreadId === action.threadId
+        ? remaining[0].id
+        : state.activeThreadId;
+      return { ...state, threads: remaining, activeThreadId: nextActive };
     }
 
     case chatActionTypes.LOCAL_THREAD_NOTE_ADDED:

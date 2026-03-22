@@ -59,7 +59,7 @@ export default function App() {
   const [state, dispatch] = useReducer(chatReducer, undefined, createInitialState);
   const generationControllersRef = useRef(new Map());
   const activeThread = selectActiveThread(state);
-  const { user, signIn, isLoading } = useUser();
+  const { user, signIn, signOut, isLoading } = useUser();
 
   // Hard gate — show login screen until authenticated
   if (!isLoading && !user) {
@@ -137,6 +137,14 @@ export default function App() {
         value: true
       });
     }
+  }
+
+  function handleDeleteThread(threadId) {
+    dispatch({ type: chatActionTypes.DELETE_THREAD, threadId });
+  }
+
+  function handleLogout() {
+    signOut();
   }
 
   function handleSelectThread(threadId) {
@@ -408,6 +416,8 @@ export default function App() {
         isCollapsed={state.isSidebarCollapsed}
         onSelectThread={handleSelectThread}
         onNewChat={handleNewChat}
+        onDeleteThread={handleDeleteThread}
+        onLogout={handleLogout}
         onClose={() => dispatch({ type: chatActionTypes.SET_SIDEBAR_COLLAPSED, value: true })}
       />
 
