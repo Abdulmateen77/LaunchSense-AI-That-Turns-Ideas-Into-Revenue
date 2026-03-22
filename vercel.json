@@ -1,7 +1,5 @@
 {
-  "buildCommand": "npm install && npm run build",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "echo skip",
-  "framework": null,
-  "rootDirectory": "frontend"
+  "framework": null
 }
