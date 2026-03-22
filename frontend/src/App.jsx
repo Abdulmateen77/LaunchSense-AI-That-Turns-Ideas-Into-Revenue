@@ -1,5 +1,6 @@
 import { useEffect, useReducer, useRef } from "react";
 import { useUser } from "@civic/auth/react";
+import { LoginPage } from "./components/LoginPage";
 import { Sidebar } from "./components/Sidebar";
 import { ChatHeader } from "./components/ChatHeader";
 import { MessageList } from "./components/MessageList";
@@ -58,7 +59,12 @@ export default function App() {
   const [state, dispatch] = useReducer(chatReducer, undefined, createInitialState);
   const generationControllersRef = useRef(new Map());
   const activeThread = selectActiveThread(state);
-  const { user, signIn } = useUser();
+  const { user, signIn, isLoading } = useUser();
+
+  // Hard gate — show login screen until authenticated
+  if (!isLoading && !user) {
+    return <LoginPage />;
+  }
 
   useEffect(() => {
     let cancelled = false;
