@@ -257,15 +257,10 @@ export default function App() {
       const validation = await validateIdea(context);
       dispatch({ type: chatActionTypes.VALIDATION_RECEIVED, threadId, validation });
     } catch (error) {
-      // If validate endpoint is unavailable, skip straight to generation
-      const msg = formatError(error).toLowerCase();
-      if (msg.includes("not found") || msg.includes("404") || msg.includes("failed to fetch") || msg.includes("network")) {
-        dispatch({ type: chatActionTypes.VALIDATION_SKIPPED, threadId });
-        await startGeneration(threadId);
-      } else {
-        const errorMessage = formatError(error);
-        dispatch({ type: chatActionTypes.THREAD_ERROR_RECORDED, threadId, errorMessage });
-      }
+      // Any validation failure — skip straight to generation rather than erroring the thread
+      console.warn("Validation skipped:", formatError(error));
+      dispatch({ type: chatActionTypes.VALIDATION_SKIPPED, threadId });
+      await startGeneration(threadId);
     }
   }
 
@@ -304,9 +299,10 @@ export default function App() {
       return;
     }
 
+    // Re-read thread from current state to avoid stale busy flag
     const thread = state.threads.find((item) => item.id === threadId);
 
-    if (!thread || !thread.context || thread.busy) {
+    if (!thread || !thread.context) {
       return;
     }
 
