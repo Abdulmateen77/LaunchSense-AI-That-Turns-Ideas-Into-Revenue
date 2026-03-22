@@ -66,6 +66,28 @@ async def generate_stream(request: GenerateRequest):
 
     models = request.models
 
+    # Keepalive task — sends a comment ping every 25s so Railway/proxies
+    # don't close the idle SSE connection during long agent calls
+    keepalive_queue: asyncio.Queue = asyncio.Queue()
+
+    async def keepalive():
+        while True:
+            await asyncio.sleep(25)
+            await keepalive_queue.put(": ping\n\n")
+
+    ka_task = asyncio.create_task(keepalive())
+
+    async def with_keepalive(coro):
+        """Drain any pending keepalive pings before/after awaiting a coroutine."""
+        result = await coro
+        while not keepalive_queue.empty():
+            yield keepalive_queue.get_nowait()
+        return result
+
+    async def flush_pings():
+        while not keepalive_queue.empty():
+            yield keepalive_queue.get_nowait()
+
     try:
         # ------------------------------------------------------------------
         # Step 0 — Research
@@ -75,6 +97,7 @@ async def generate_stream(request: GenerateRequest):
         evidence = await run_research_agent(
             context, model=models.research if models else None
         )
+        async for ping in flush_pings(): yield ping
 
         research_eval = eval_research(evidence)
 
@@ -83,6 +106,7 @@ async def generate_stream(request: GenerateRequest):
             evidence = await run_research_agent(
                 context, model=models.research if models else None
             )
+            async for ping in flush_pings(): yield ping
 
         yield emit("research", evidence.model_dump())
 
@@ -90,6 +114,7 @@ async def generate_stream(request: GenerateRequest):
         # Step 1 — RAG + Offer
         # ------------------------------------------------------------------
         principles = await get_principles(context, evidence=evidence)
+        async for ping in flush_pings(): yield ping
 
         yield emit("status", {"step": 1, "label": "Building your offer..."})
 
@@ -99,8 +124,10 @@ async def generate_stream(request: GenerateRequest):
             principles,
             model=models.offer if models else None,
         )
+        async for ping in flush_pings(): yield ping
 
         offer_eval = await eval_offer(offer, evidence)
+        async for ping in flush_pings(): yield ping
         yield emit("eval", {"research": research_eval.model_dump(), "offer": offer_eval.model_dump()})
 
         if offer_eval.action == "regenerate_offer":
@@ -112,6 +139,7 @@ async def generate_stream(request: GenerateRequest):
                 model=models.offer if models else None,
                 weak_point=weak_point,
             )
+            async for ping in flush_pings(): yield ping
 
         yield emit("offer", offer.model_dump())
 
@@ -130,6 +158,7 @@ async def generate_stream(request: GenerateRequest):
 
         # return_exceptions=True so one failure doesn't kill the other
         page_result, growth_result = await asyncio.gather(builder_coro, growth_coro, return_exceptions=True)
+        async for ping in flush_pings(): yield ping
 
         landing_page = None
         growth_pack = None
@@ -187,6 +216,8 @@ async def generate_stream(request: GenerateRequest):
     except Exception as e:
         print(f"Pipeline error: {e}")
         yield emit("error", {"message": str(e)})
+    finally:
+        ka_task.cancel()
 
 
 # ---------------------------------------------------------------------------
