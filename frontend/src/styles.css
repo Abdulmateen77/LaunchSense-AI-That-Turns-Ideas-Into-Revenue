@@ -1500,3 +1500,178 @@ textarea {
   border-color: #93c5fd;
   background: #ffffff;
 }
+
+/* ── Login page ──────────────────────────────────────────────── */
+
+.login-shell {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 1.5rem;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: min(100%, 22rem);
+  padding: 2.5rem 2rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.07);
+  text-align: center;
+}
+
+.login-logo svg {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.login-copy {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.login-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.login-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #111827;
+  border: 1px solid #111827;
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.login-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.login-btn:disabled {
+  background: #e5e7eb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.login-terms {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* ── Sidebar thread delete + logout ─────────────────────────── */
+
+.thread-card {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 0.9rem;
+  background: transparent;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.thread-card--active {
+  background: var(--active);
+  border-color: #dbeafe;
+}
+
+.thread-card:hover {
+  background: var(--hover);
+}
+
+.thread-card--active:hover {
+  background: var(--active);
+}
+
+.thread-card__body {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 0.9rem;
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.thread-card__delete {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.4rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease, background 120ms ease;
+}
+
+.thread-card:hover .thread-card__delete {
+  opacity: 1;
+}
+
+.thread-card__delete:hover {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.sidebar__logout:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.sidebar__logout--icon {
+  justify-content: center;
+  padding-inline: 0;
+}
