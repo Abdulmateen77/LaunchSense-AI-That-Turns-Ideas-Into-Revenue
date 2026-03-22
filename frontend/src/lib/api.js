@@ -108,5 +108,7 @@ export async function fetchStoredPackage(slug) {
 }
 
 export function buildAbsolutePackageUrl(pathname) {
-  return new URL(pathname, API_BASE_URL).toString();
+  const base = API_BASE_URL.replace(/\/$/, "");
+  const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return `${base}${path}`;
 }
